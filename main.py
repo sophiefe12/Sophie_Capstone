@@ -10,7 +10,6 @@ print(f"API Key: {os.getenv('ALPHAVANTAGE_API_KEY')}")
 
 app = Flask(__name__)
 CORS(app)
-# ... rest of your code ...
 
 # Hardcoded "database" for demonstration
 users = {
