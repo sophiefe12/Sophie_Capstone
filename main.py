@@ -1,7 +1,16 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 import requests
+import os
+
+from dotenv import load_dotenv
+load_dotenv()
+print(f"Environment: {os.getenv('FLASK_ENV')}")
+print(f"API Key: {os.getenv('ALPHAVANTAGE_API_KEY')}")
 
 app = Flask(__name__)
+CORS(app)
+# ... rest of your code ...
 
 # Hardcoded "database" for demonstration
 users = {
@@ -25,112 +34,45 @@ users = {
     }
 }
 
-def get_stock_info(symbol):
-    base_url = "https://www.alphavantage.co/query"
-    params = {
-        'function': 'TIME_SERIES_MONTHLY',
-        'symbol': symbol,
-        'apikey': 'W5GNQVIAT6ZNULOG'  
-    }
-    response = requests.get(base_url, params=params)
-    if response.status_code == 200:
-        data = response.json()
-        last_month = list(data['Monthly Time Series'].keys())[0]
-        closing_price = data['Monthly Time Series'][last_month]['4. close']
-        return {'symbol': symbol, 'last_month_closing_price': closing_price}
+@app.route('/users/<user_id>', methods=['GET'])
+def get_user(user_id):
+    user = users.get(user_id)
+    if user:
+        response = jsonify(users)
+        response.headers.add("Access-Control-Allow-Origin","*")
+        return response
     else:
-        return {'error': 'Failed to fetch stock data, investment values are currently being updated'}
-
-@app.route('/')
-def index():
-    return '''
-    <html>
-        <head>
-            <title>Stock Tracker</title>
-        </head>
-        <body>
-            <h1>Welcome to the Stock Tracker</h1>
-            <p>Please choose which user you are:</p>
-            <ul>
-                <li><a href="/user/user1">User 1</a></li>
-                <li><a href="/user/user2">User 2</a></li>
-            </ul>
-        </body>
-    </html>
-    '''
-
-@app.route('/user/<user_id>')
-def user_page(user_id):
-    if user_id not in users:
         return jsonify({'error': 'User not found'}), 404
-    user = users[user_id]
-    # Generate HTML table for stocks information with links
-    stocks_table = '<table><tr><th>Company Name</th><th>Symbol</th><th>% of Portfolio</th><th>Value</th></tr>'
-    for stock in user['stocks']:
-        stocks_table += f"<tr><td>{stock['name']}</td><td><a href='/stock/{stock['symbol']}'>{stock['symbol']}</a></td><td>{stock['portfolio_percentage']}%</td><td>{stock['value']}</td></tr>"
-    stocks_table += '</table>'
-    
-    # Structured display using HTML
-    return f'''
-    <html>
-        <head>
-            <title>{user_id} Portfolio</title>
-            <style>
-                table {{
-                    width: 60%;
-                    border-collapse: collapse;
-                }}
-                th, td {{
-                    text-align: left;
-                    padding: 8px;
-                    border-bottom: 1px solid #ddd;
-                }}
-                th {{
-                    background-color: #f2f2f2;
-                }}
-                a {{
-                    text-decoration: none;
-                    color: blue;
-                }}
-                a:hover {{
-                    text-decoration: underline;
-                }}
-            </style>
-        </head>
-        <body>
-            <h1>{user_id} - Total Investment: {user['total_investment']}</h1>
-            <h2>Stocks Breakdown:</h2>
-            {stocks_table}
-            <a href="/">Back to Home</a>
-        </body>
-    </html>
-    '''
 
-@app.route('/stock/<symbol>')
-def stock_info(symbol):
+@app.route('/stock/<symbol>', methods=['GET'])
+def get_stock(symbol):
     base_url = "https://www.alphavantage.co/query"
+    api_key = os.getenv('ALPHAVANTAGE_API_KEY')  # Environment variable for API key
     params = {
         'function': 'TIME_SERIES_MONTHLY',
         'symbol': symbol,
-        'apikey': 'YOUR_API_KEY'  # Replace 'YOUR_API_KEY' with your actual API key
+        'apikey': api_key
     }
     response = requests.get(base_url, params=params)
     if response.status_code == 200:
         data = response.json()
         monthly_data = data.get('Monthly Time Series', {})
-        # Extract the last 12 months of data
-        last_12_months_keys = sorted(list(monthly_data.keys()))[-12:]
-        closing_prices = {date: monthly_data[date]['4. close'] for date in last_12_months_keys}
-        
-        # Return a JSON response with the data
+        if not monthly_data:
+            return jsonify({'error': 'No monthly data found for symbol'}), 404
+        last_month = list(monthly_data.keys())[0]
+        closing_price = monthly_data[last_month]['4. close']
         return jsonify({
             'symbol': symbol,
-            'closing_prices_last_12_months': closing_prices
-        })
+            'last_month_closing_price': closing_price
+        }), 200
     else:
-        return jsonify({'error': 'Failed to fetch stock data, please try again later'}), 500
-
-
+        return jsonify({'error': 'Failed to fetch stock data'}), response.status_code
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Load environment variables from .env file in a non-production environment
+    # if os.environ.get('FLASK_ENV') != 'production':
+    #      from dotenv import load_dotenv
+    #      load_dotenv()
+
+    # Run the application
+    app.run()
