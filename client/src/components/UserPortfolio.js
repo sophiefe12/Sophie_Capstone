@@ -20,7 +20,7 @@ function fetchStockDetails(symbol) {
 function UserPortfolio() {
   const { userId } = useParams();
   const [portfolio, setPortfolio] = useState({ stocks: [], total_investment: '0.00€', roi: '0.00€' });
-  const [newStockSymbol, setNewStockSymbol] = useState('');
+  //const [newStockSymbol, setNewStockSymbol] = useState('');
 
   useEffect(() => {
     fetch(`http://127.0.0.1:5000/users/${userId}`)
@@ -50,52 +50,52 @@ function UserPortfolio() {
   
   
 
-function handleAddStock(e) {
-    e.preventDefault();
-    fetchStockDetails(newStockSymbol).then(stockDetails => {
-      // Calculate the value of the new stock based on shares and current price
-      const newStockValue = stockDetails.currentPrice; // Assuming 1 share
-      const newTotalInvestment = parseFloat(portfolio.total_investment.replace('€', '')) + newStockValue;
+// function handleAddStock(e) {
+//     e.preventDefault();
+//     fetchStockDetails(newStockSymbol).then(stockDetails => {
+//       // Calculate the value of the new stock based on shares and current price
+//       const newStockValue = stockDetails.currentPrice; // Assuming 1 share
+//       const newTotalInvestment = parseFloat(portfolio.total_investment.replace('€', '')) + newStockValue;
       
-      const updatedStocks = portfolio.stocks.map(stock => {
-        // Convert stock value to float and recalculate portfolio percentage
-        const stockValue = parseFloat(stock.value.replace('€', ''));
-        return {
-          ...stock,
-          portfolio_percentage: ((stockValue / newTotalInvestment) * 100).toFixed(2),
-        };
-      });
+//       const updatedStocks = portfolio.stocks.map(stock => {
+//         // Convert stock value to float and recalculate portfolio percentage
+//         const stockValue = parseFloat(stock.value.replace('€', ''));
+//         return {
+//           ...stock,
+//           portfolio_percentage: ((stockValue / newTotalInvestment) * 100).toFixed(2),
+//         };
+//       });
   
-      // Create the new stock object with updated percentage
-      const stockToAdd = {
-        ...stockDetails,
-        portfolio_percentage: ((newStockValue / newTotalInvestment) * 100).toFixed(2),
-        value: `${newStockValue.toFixed(2)}€`,
-        shares: 1, // Assuming 1 share
-      };
+//       // Create the new stock object with updated percentage
+//       const stockToAdd = {
+//         ...stockDetails,
+//         portfolio_percentage: ((newStockValue / newTotalInvestment) * 100).toFixed(2),
+//         value: `${newStockValue.toFixed(2)}€`,
+//         shares: 1, // Assuming 1 share
+//       };
   
-      updatedStocks.push(stockToAdd);
+//       updatedStocks.push(stockToAdd);
   
-      // Update portfolio with the new stocks array and total investment
-      setPortfolio({
-        ...portfolio,
-        stocks: updatedStocks,
-        total_investment: `${newTotalInvestment.toFixed(2)}€`,
-      });
+//       // Update portfolio with the new stocks array and total investment
+//       setPortfolio({
+//         ...portfolio,
+//         stocks: updatedStocks,
+//         total_investment: `${newTotalInvestment.toFixed(2)}€`,
+//       });
   
-      // Add the new stock in the backend as well
-      fetch(`http://127.0.0.1:5000/users/${userId}/add_stock`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(stockToAdd),
-      })
-      // ... handle the backend response as before
-    }).catch(error => {
-      console.error('Error fetching stock details:', error);
-    });
-  }
+//       // Add the new stock in the backend as well
+//       fetch(`http://127.0.0.1:5000/users/${userId}/add_stock`, {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify(stockToAdd),
+//       })
+//       // ... handle the backend response as before
+//     }).catch(error => {
+//       console.error('Error fetching stock details:', error);
+//     });
+//   }
   
 
   // Renders the table with portfolio stocks
@@ -143,22 +143,12 @@ function handleAddStock(e) {
 
   return (
     <div className="container mt-5">
-      <h2>Total Investment: {portfolio.total_investment}</h2>
-      <h2>ROI: {portfolio.roi}</h2>
-      {renderStocksTable(portfolio.stocks)}
-      <form onSubmit={handleAddStock} className="mt-3">
-        <div className="form-group">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Symbol"
-            value={newStockSymbol}
-            onChange={(e) => setNewStockSymbol(e.target.value)}
-          />
-        </div>
-        <button type="submit" className="btn btn-primary">Add Stock</button>
-      </form>
+    <h2>Total Investment: {portfolio.total_investment}</h2>
+    <h2>ROI: {portfolio.roi}</h2>
+    {renderStocksTable(portfolio.stocks)}
+    <div className="form-group">
     </div>
+</div>
   );
 }
 
