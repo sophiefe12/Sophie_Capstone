@@ -39,8 +39,8 @@ function StockDetails() {
   // Render the stock details with a custom navy blue header
   const renderStockDetails = () => (
     <>
-      <h2 className="mb-4" style={{ color: '#000080' }}>Stock Details for {symbol}</h2> {/* Navy blue color */}
-      <div className="card">
+      <h2 className="mb-4" style={{ color: '#000080' }}>Stock Details for {symbol}</h2>
+      <div className="card shadow"> 
         <ul className="list-group list-group-flush">
           {stockDetails.map((detail, index) => (
             <li key={index} className="list-group-item">
@@ -53,7 +53,6 @@ function StockDetails() {
     </>
   );
 
-  // The component renders a container div with conditional rendering based on the stockDetails length.
   return (
     <div className="container mt-5">
       {isLoading ? renderSpinner() : renderStockDetails()}
@@ -62,4 +61,3 @@ function StockDetails() {
 }
 
 export default StockDetails;
-

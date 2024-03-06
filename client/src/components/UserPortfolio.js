@@ -2,26 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
 
-// Define custom styles for navy blue color, red color, and bold text
-const styles = {
-  navyBlueText: {
-    color: '#000080', // This is a common color for "navy blue"
-  },
-  redText: {
-    color: '#FF0000', // This is a hex code for "red"
-  },
-  boldText: {
-    fontWeight: 'bold',
-  },
-  navyBlueTable: {
-    borderColor: '#000080', // Border color for the table
-  },
-  navyBlueTableHeader: {
-    backgroundColor: '#000080', // Background color for table header
-    color: '#ffffff', // Text color for table header
-  }
-};
-
 
 // Fetch stock details from the backend API
 function fetchStockDetails(symbol) {
@@ -126,53 +106,50 @@ function UserPortfolio() {
   
 
   // Function to render the stocks table
-  const renderStocksTable = (stocks) => {
-    if (!stocks) return <div>Loading...</div>; // or any other loading state
-  
-    return (
-      <table className="table table-bordered shadow" style={styles.navyBlueTable}> {/* You can choose 'shadow-sm' or 'shadow-lg' as well */}
-    <thead style={styles.navyBlueTableHeader}>
-      <tr>
-        <th>Name</th>
-        <th>Shares</th>
-        <th>Purchase Price</th>
-        <th>Portfolio Percentage</th>
-        <th>Ticker</th>
-        <th>Current Value</th>
-      </tr>
-    </thead>
-      <tbody>
-          {stocks.map((stock, index) => {
-            // Check if the properties exist before calling toFixed
-            const purchasePrice = stock.purchase_price ? stock.purchase_price.toFixed(2) + '€' : 'N/A';
-            const portfolioPercentage = stock.portfolio_percentage
-            ? `${stock.portfolio_percentage.toFixed(2)}%`
-            : 'N/A';
-            const investment = stock.current_price && stock.shares ? (stock.current_price * stock.shares).toFixed(2) + '€' : 'N/A';
-  
-            return (
-              <tr key={index}>
-                <td>{stock.name || 'N/A'}</td>
-                <td>{stock.shares || 'N/A'}</td>
-                <td>{purchasePrice}</td>
-                <td>{portfolioPercentage}</td>
-                <td>
-                  <Link to={`/stock_details/${stock.symbol}`}>{stock.symbol}</Link>
-                </td>
-                <td>{investment}</td>
-              </tr>
-            );
-          })}
+  const renderStocksTable = (stocks) => (
+    <div className="table-responsive">
+      <table className="table table-bordered table-hover shadow">
+        <thead style={{ backgroundColor: '#000080', color: 'white' }}>
+          <tr>
+            <th>Name</th>
+            <th>Shares</th>
+            <th>Purchase Price</th>
+            <th>Portfolio Percentage</th>
+            <th>Ticker</th>
+            <th>Current Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {stocks.map((stock, index) => (
+            <tr key={index}>
+              <td>{stock.name}</td>
+              <td>{stock.shares}</td>
+              <td>{`${stock.purchase_price.toFixed(2)}€`}</td>
+              <td>{`${stock.portfolio_percentage.toFixed(2)}%`}</td>
+              <td><Link to={`/stock_details/${stock.symbol}`}>{stock.symbol}</Link></td>
+              <td>{`${(stock.current_price * stock.shares).toFixed(2)}€`}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
-    );
-  };  
+    </div>
+  );
 
   return (
     <div className="container mt-5">
-      <h2 style={{ ...styles.navyBlueText, ...styles.boldText }}>Total Investment: {portfolio ? portfolio.total_investment : '-'}</h2>
-      <h2 style={{ ...styles.Text, ...styles.boldText }}>Return On Investment: {portfolio ? portfolio.roi : '-'}</h2>
-      {portfolio ? renderStocksTable(portfolio.stocks) : renderSpinner()}
+      {portfolio ? (
+        <>
+          <h2 style={{ color: '#000080' }}>Total Investment: {portfolio.total_investment}</h2>
+          <h2 style={{ color: 'black' }}>ROI: {portfolio.roi}</h2>
+          {renderStocksTable(portfolio.stocks)}
+        </>
+      ) : (
+        <div className="text-center">
+          <div className="spinner-border" style={{ color: '#000080' }} role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
