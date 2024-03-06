@@ -1,11 +1,12 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom'; 
 import 'bootstrap/dist/css/bootstrap.min.css'; // Bootstrap styles
 import WelcomePage from './components/WelcomePage';
 import UserPortfolio from './components/UserPortfolio';
 import StockDetails from './components/StockDetails';
 
 function App() {
+  console.log("it gets here")
   return (
     <Router>
       <Routes>

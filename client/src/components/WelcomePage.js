@@ -8,6 +8,13 @@ function WelcomePage() {
         <div className="row justify-content-center">
           <div className="col-md-8">
             <div className="text-center mb-5">
+              {/* Logo with shadow */}
+              <img
+                src="/logo_S.png" // Update the path to where your logo is stored
+                alt="Stock Tracker Logo"
+                className="mb-3"
+                style={{ width: '100px', height: 'auto', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+              />
               <h1 className="display-4">Welcome to the Stock Tracker</h1>
             </div>
             <div className="list-group">

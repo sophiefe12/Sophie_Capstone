@@ -1,8 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
+
+// Define custom styles for navy blue color, red color, and bold text
+const styles = {
+  navyBlueText: {
+    color: '#000080', // This is a common color for "navy blue"
+  },
+  redText: {
+    color: '#FF0000', // This is a hex code for "red"
+  },
+  boldText: {
+    fontWeight: 'bold',
+  },
+  navyBlueTable: {
+    borderColor: '#000080', // Border color for the table
+  },
+  navyBlueTableHeader: {
+    backgroundColor: '#000080', // Background color for table header
+    color: '#ffffff', // Text color for table header
+  }
+};
+
+
+// Fetch stock details from the backend API
 function fetchStockDetails(symbol) {
-    return fetch(`http://127.0.0.1:5000/stock_details/${symbol}`)
+    return fetch(`https://mcsbt-integration-sophie.ew.r.appspot.com/stock_details/${symbol}`)
       .then(response => response.json())
       .then(data => {
         if (!data.error) {
@@ -17,16 +40,20 @@ function fetchStockDetails(symbol) {
       });
   }
 
+
+// Main component to display a user's stock portfolio
 function UserPortfolio() {
   const { userId } = useParams();
   const [portfolio, setPortfolio] = useState({ stocks: [], total_investment: '0.00€', roi: '0.00€' });
   //const [newStockSymbol, setNewStockSymbol] = useState('');
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:5000/users/${userId}`)
+    // Fetch user data on component mount or when userId changes
+    fetch(`https://mcsbt-integration-sophie.ew.r.appspot.com/users/${userId}`)
       .then(response => response.json())
       .then(data => {
         if (data && data.stocks) {
+          // Calculate total investment and ROI for the user
           const totalInvestment = data.stocks.reduce((sum, stock) => sum + (stock.purchase_price * stock.shares), 0);
           const totalCurrentValue = data.stocks.reduce((sum, stock) => sum + (stock.current_price * stock.shares), 0);
           const roi = totalCurrentValue - totalInvestment;
@@ -35,7 +62,7 @@ function UserPortfolio() {
             ...stock,
             portfolio_percentage: ((stock.current_price * stock.shares) / totalCurrentValue) * 100
           }));
-  
+          // Update portfolio data in the state
           setPortfolio({ 
             stocks: stocksWithPercentage,
             total_investment: totalInvestment.toLocaleString('en-EU', { style: 'currency', currency: 'EUR' }),
@@ -46,7 +73,7 @@ function UserPortfolio() {
       .catch(error => {
         console.error('Error fetching data:', error);
       });
-  }, [userId]);
+  }, [userId]); // Dependency array to trigger effect when userId changes
   
   
 
@@ -98,23 +125,23 @@ function UserPortfolio() {
 //   }
   
 
-  // Renders the table with portfolio stocks
+  // Function to render the stocks table
   const renderStocksTable = (stocks) => {
     if (!stocks) return <div>Loading...</div>; // or any other loading state
   
     return (
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Shares</th>
-            <th>Purchase Price</th>
-            <th>Portfolio Percentage</th>
-            <th>Ticker</th>
-            <th>Current Value</th>
-          </tr>
-        </thead>
-        <tbody>
+      <table className="table table-bordered shadow" style={styles.navyBlueTable}> {/* You can choose 'shadow-sm' or 'shadow-lg' as well */}
+    <thead style={styles.navyBlueTableHeader}>
+      <tr>
+        <th>Name</th>
+        <th>Shares</th>
+        <th>Purchase Price</th>
+        <th>Portfolio Percentage</th>
+        <th>Ticker</th>
+        <th>Current Value</th>
+      </tr>
+    </thead>
+      <tbody>
           {stocks.map((stock, index) => {
             // Check if the properties exist before calling toFixed
             const purchasePrice = stock.purchase_price ? stock.purchase_price.toFixed(2) + '€' : 'N/A';
@@ -143,12 +170,10 @@ function UserPortfolio() {
 
   return (
     <div className="container mt-5">
-    <h2>Total Investment: {portfolio.total_investment}</h2>
-    <h2>ROI: {portfolio.roi}</h2>
-    {renderStocksTable(portfolio.stocks)}
-    <div className="form-group">
+      <h2 style={{ ...styles.navyBlueText, ...styles.boldText }}>Total Investment: {portfolio ? portfolio.total_investment : '-'}</h2>
+      <h2 style={{ ...styles.Text, ...styles.boldText }}>Return On Investment: {portfolio ? portfolio.roi : '-'}</h2>
+      {portfolio ? renderStocksTable(portfolio.stocks) : renderSpinner()}
     </div>
-</div>
   );
 }
 

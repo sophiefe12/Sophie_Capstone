@@ -4,17 +4,17 @@ import requests
 import os
 import json
 
-
+# Load environment variables from a .env file
 from dotenv import load_dotenv
 load_dotenv()
 
+# Initialize Flask app and enable Cross-Origin Resource Sharing (CORS)
 app = Flask(__name__)
 CORS(app)
 
-
 # Hardcoded "database" for demonstration
 def read_data():
-    file_path = '/Users/sophiefe/Dropbox/My Mac (Sophie’s MacBook Pro)/Documents/IE Master courses /Term 2/Capstone/Milestone_1/data.json'
+    file_path = 'data.json'
     with open(file_path, 'r') as f:
         data = json.load(f)
     return data
@@ -25,6 +25,7 @@ def write_data(data):
     with open('data.json', 'w') as f:
         json.dump(data, f, indent=4)
 
+# fetch the latest stock price from the Alpha Vantage API
 def get_latest_stock_price(symbol):
     api_key = os.getenv('ALPHAVANTAGE_API_KEY')
     params = {
@@ -38,6 +39,8 @@ def get_latest_stock_price(symbol):
         return float(quote_data.get('05. price', 0))
     return 0  # Return 0 if the request fails or no price data is found
 
+
+# Define a route to get details of a specific user including their stocks and investments
 @app.route('/users/<user_id>', methods=['GET'])
 def get_user(user_id):
     user = users.get(user_id)
@@ -61,19 +64,21 @@ def get_user(user_id):
         return jsonify({'error': 'User not found'}), 404
 
     
-@app.route('/users/<user_id>/add_stock', methods=['POST'])
-def add_stock(user_id):
-    data = request.json  # Get data sent with POST request
-    users = read_data()  # Read the current data
-    # Check if user exists
-    if user_id not in users:
-        return jsonify({'error': 'User not found'}), 404
-    # Add the new stock to the user's portfolio
-    users[user_id]['stocks'].append(data)
-    # Save the updated data back to the JSON file
-    write_data(users)
-    return jsonify({'success': True, 'stock': data}), 200
+# @app.route('/users/<user_id>/add_stock', methods=['POST'])
+# def add_stock(user_id):
+#     data = request.json  # Get data sent with POST request
+#     users = read_data()  # Read the current data
+#     # Check if user exists
+#     if user_id not in users:
+#         return jsonify({'error': 'User not found'}), 404
+#     # Add the new stock to the user's portfolio
+#     users[user_id]['stocks'].append(data)
+#     # Save the updated data back to the JSON file
+#     write_data(users)
+#     return jsonify({'success': True, 'stock': data}), 200
 
+
+# Define a route to get details of a specific stock including its current price and company name
 @app.route('/stock_details/<symbol>', methods=['GET'])
 def get_stock_details(symbol):
     api_key = os.getenv('ALPHAVANTAGE_API_KEY')
@@ -112,11 +117,11 @@ def get_stock_details(symbol):
         return jsonify({'error': 'Failed to fetch company name'}), search_response.status_code
 
 
-
+# Define a route to get the monthly stock data for the last 12 months of a specific stock
 @app.route('/stock/<symbol>', methods=['GET'])
 def get_stock(symbol):
     base_url = "https://www.alphavantage.co/query"
-    api_key = os.getenv('ALPHAVANTAGE_API_KEY')  # Ensure your API key is correctly set in your environment variables
+    api_key = os.getenv('ALPHAVANTAGE_API_KEY') 
     params = {
         'function': 'TIME_SERIES_MONTHLY',
         'symbol': symbol,
@@ -144,10 +149,4 @@ def get_stock(symbol):
 
 
 if __name__ == '__main__':
-    # Load environment variables from .env file in a non-production environment
-    # if os.environ.get('FLASK_ENV') != 'production':
-    #      from dotenv import load_dotenv
-    #      load_dotenv()
-
-    # Run the application
     app.run()
