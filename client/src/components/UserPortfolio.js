@@ -1,155 +1,208 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 
-
-
-// Fetch stock details from the backend API
-function fetchStockDetails(symbol) {
-    return fetch(`https://mcsbt-integration-sophie.ew.r.appspot.com/stock_details/${symbol}`)
-      .then(response => response.json())
-      .then(data => {
-        if (!data.error) {
-          return {
-            symbol: symbol,
-            name: data.name, // Use the name from the API response
-            currentPrice: parseFloat(data.price), // Parse the price to a float
-          };
-        } else {
-          throw new Error(data.error);
-        }
-      });
-  }
-
-
-// Main component to display a user's stock portfolio
-function UserPortfolio() {
+function UserPortfolio({ isLoggedIn }) {
   const { userId } = useParams();
-  const [portfolio, setPortfolio] = useState({ stocks: [], total_investment: '0.00€', roi: '0.00€' });
-  //const [newStockSymbol, setNewStockSymbol] = useState('');
+  const navigate = useNavigate();
+  const [totalInvestment, setTotalInvestment] = useState(0);
+  const [portfolio, setPortfolio] = useState({
+    username: '',
+    stocks: [],
+    total_investment: '0.00€',
+    roi: '0.00%',
+  });
+  const [form, setForm] = useState({
+    ticker: '',
+    shares: '',
+    purchasePrice: '',
+  });
 
   useEffect(() => {
-    // Fetch user data on component mount or when userId changes
-    fetch(`https://mcsbt-integration-sophie.ew.r.appspot.com/users/${userId}`)
-      .then(response => response.json())
-      .then(data => {
-        if (data && data.stocks) {
-          // Calculate total investment and ROI for the user
-          const totalInvestment = data.stocks.reduce((sum, stock) => sum + (stock.purchase_price * stock.shares), 0);
-          const totalCurrentValue = data.stocks.reduce((sum, stock) => sum + (stock.current_price * stock.shares), 0);
-          const roi = totalCurrentValue - totalInvestment;
-          // Calculate portfolio percentage for each stock
-          const stocksWithPercentage = data.stocks.map(stock => ({
+    if (!isLoggedIn) {
+      navigate('/welcomepage');
+      return;
+    }
+
+    const fetchPortfolioData = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}`);
+        if (response.ok) {
+          const data = await response.json();
+          const updatedStocks = data.stocks.map(stock => ({
             ...stock,
-            portfolio_percentage: ((stock.current_price * stock.shares) / totalCurrentValue) * 100
+            shares: parseInt(stock.shares, 10),
+            purchase_price: `${parseFloat(stock.purchase_price).toFixed(2)}€`,
+            current_price: `${parseFloat(stock.current_price).toFixed(2)}€` // Assuming you have current_price in your response
           }));
-          // Update portfolio data in the state
-          setPortfolio({ 
-            stocks: stocksWithPercentage,
-            total_investment: totalInvestment.toLocaleString('en-EU', { style: 'currency', currency: 'EUR' }),
-            roi: roi.toLocaleString('en-EU', { style: 'currency', currency: 'EUR' })
-          });
+          
+          const totalInvestment = updatedStocks.reduce((acc, curr) => acc + (curr.shares * parseFloat(curr.purchase_price)), 0);
+  
+          // It's important to calculate ROI based on the data just fetched rather than relying on the potentially stale portfolio state
+          const totalCurrentValue = (updatedStocks.reduce((acc, curr) => acc + (curr.shares * parseFloat(curr.current_price)), 0));
+          const roi = totalInvestment > 0 ? ((totalCurrentValue - totalInvestment) / totalInvestment) * 100 : 0;
+  
+          setPortfolio(prevPortfolio => ({
+            ...prevPortfolio,
+            ...data,
+            stocks: updatedStocks,
+            username: data.name,
+            roi: `${roi.toFixed(2)}%`
+          }));
+  
+          setTotalInvestment(totalInvestment);
+        } else {
+          throw new Error('Failed to fetch portfolio data');
         }
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
+      } catch (error) {
+        console.error('Error fetching portfolio data:', error);
+      }
+    };
+  
+    fetchPortfolioData();
+  }, [userId, isLoggedIn, navigate]);
+
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+      setForm(prevForm => ({
+        ...prevForm,
+        [name]: value,
+      }));
+    };
+
+    const handleAddStockSubmit = async (e) => {
+      e.preventDefault();
+      try {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/add_stock`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            symbol: form.ticker,
+            shares: parseInt(form.shares),
+            purchase_price: parseFloat(form.purchasePrice),
+          }),
+        });
+        if (response.ok) {
+          const stockResponse = await response.json();
+          const newStock = {
+            ...stockResponse.stock,
+            shares: parseInt(form.shares),
+            purchase_price: `${parseFloat(form.purchasePrice).toFixed(2)}€`,
+          };
+          setPortfolio(prevPortfolio => ({
+            ...prevPortfolio,
+            stocks: [...prevPortfolio.stocks, newStock],
+          }));
+          setForm({
+            ticker: '',
+            shares: '',
+            purchasePrice: ''
+          });
+        } else {
+          throw new Error('Network response was not ok.');
+        }
+      } catch (error) {
+        console.error('Error adding stock:', error);
+      }
+    };
+
+  const handleRemoveStock = async (stockId) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/remove_stock/${stockId}`, {
+        method: 'DELETE',
       });
-  }, [userId]); // Dependency array to trigger effect when userId changes
-  
-  
+      console.log('Response:', response);
+      if (response.ok) {
+        setPortfolio(prevPortfolio => ({
+          ...prevPortfolio,
+          stocks: prevPortfolio.stocks.filter(stock => stock.id !== stockId),
+        }));
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to remove the stock');
+      }
+    } catch (error) {
+      console.error('Error removing stock:', error);
+    }
+  };
 
-// function handleAddStock(e) {
-//     e.preventDefault();
-//     fetchStockDetails(newStockSymbol).then(stockDetails => {
-//       // Calculate the value of the new stock based on shares and current price
-//       const newStockValue = stockDetails.currentPrice; // Assuming 1 share
-//       const newTotalInvestment = parseFloat(portfolio.total_investment.replace('€', '')) + newStockValue;
-      
-//       const updatedStocks = portfolio.stocks.map(stock => {
-//         // Convert stock value to float and recalculate portfolio percentage
-//         const stockValue = parseFloat(stock.value.replace('€', ''));
-//         return {
-//           ...stock,
-//           portfolio_percentage: ((stockValue / newTotalInvestment) * 100).toFixed(2),
-//         };
-//       });
-  
-//       // Create the new stock object with updated percentage
-//       const stockToAdd = {
-//         ...stockDetails,
-//         portfolio_percentage: ((newStockValue / newTotalInvestment) * 100).toFixed(2),
-//         value: `${newStockValue.toFixed(2)}€`,
-//         shares: 1, // Assuming 1 share
-//       };
-  
-//       updatedStocks.push(stockToAdd);
-  
-//       // Update portfolio with the new stocks array and total investment
-//       setPortfolio({
-//         ...portfolio,
-//         stocks: updatedStocks,
-//         total_investment: `${newTotalInvestment.toFixed(2)}€`,
-//       });
-  
-//       // Add the new stock in the backend as well
-//       fetch(`http://127.0.0.1:5000/users/${userId}/add_stock`, {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-//         body: JSON.stringify(stockToAdd),
-//       })
-//       // ... handle the backend response as before
-//     }).catch(error => {
-//       console.error('Error fetching stock details:', error);
-//     });
-//   }
-  
-
-  // Function to render the stocks table
-  const renderStocksTable = (stocks) => (
-    <div className="table-responsive">
-      <table className="table table-bordered table-hover shadow">
-        <thead style={{ backgroundColor: '#000080', color: 'white' }}>
-          <tr>
-            <th>Name</th>
-            <th>Shares</th>
-            <th>Purchase Price</th>
-            <th>Portfolio Percentage</th>
-            <th>Ticker</th>
-            <th>Current Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          {stocks.map((stock, index) => (
-            <tr key={index}>
-              <td>{stock.name}</td>
-              <td>{stock.shares}</td>
-              <td>{`${stock.purchase_price.toFixed(2)}€`}</td>
-              <td>{`${stock.portfolio_percentage.toFixed(2)}%`}</td>
-              <td><Link to={`/stock_details/${stock.symbol}`}>{stock.symbol}</Link></td>
-              <td>{`${(stock.current_price * stock.shares).toFixed(2)}€`}</td>
+  const renderStocksTable = () => {
+    if (portfolio.stocks.length === 0) {
+      return <p>This is where your stocks will appear once you add them!</p>;
+    }
+    return (
+      <div className="table-responsive">
+        <table className="table table-bordered table-hover shadow">
+          <thead style={{ backgroundColor: '#000080', color: 'white' }}>
+            <tr>
+              <th>Name</th>
+              <th>Shares</th>
+              <th>Purchase Price</th>
+              <th>Current Value</th>
+              <th>Portfolio Percentage</th>
+              <th>Ticker</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+          </thead>
+          <tbody>
+            {portfolio.stocks.map(stock => (
+              <tr key={stock.id}>
+                <td>{stock.name || 'Unknown'}</td>
+                <td>{stock.shares}</td>
+                <td>{stock.purchase_price}</td>
+                <td>{stock.current_price}</td>
+                {/* Calculate portfolio percentage based on total investment */}
+                <td>{((stock.shares * parseFloat(stock.purchase_price)) / totalInvestment * 100).toFixed(2)}%</td>
+                {/* Access totalInvestment from state (fixed the division by zero issue) */}
+                <td><Link to={`/stock_details/${stock.symbol}`}>{stock.symbol || 'N/A'}</Link></td>
+                <td>
+                  <button onClick={() => handleRemoveStock(stock.id)}>Remove</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
 
   return (
     <div className="container mt-5">
-      {portfolio ? (
-        <>
-          <h2 style={{ color: '#000080' }}>Total Investment: {portfolio.total_investment}</h2>
-          <h2 style={{ color: 'black' }}>ROI: {portfolio.roi}</h2>
-          {renderStocksTable(portfolio.stocks)}
-        </>
-      ) : (
-        <div className="text-center">
-          <div className="spinner-border" style={{ color: '#000080' }} role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      )}
+      <h2>{portfolio.username ? `${portfolio.username}'s Portfolio` : "User's Portfolio"}</h2>
+      <h3 style={{ color: '#000080' }}>Total Initial Investment: {totalInvestment.toFixed(2)}€</h3>
+      <h3 style={{ color: 'green' }}>ROI: {portfolio.roi}</h3>
+      <form onSubmit={handleAddStockSubmit} className="mb-3">
+        <input
+          type="text"
+          className="form-control mb-2"
+          placeholder="Ticker Symbol"
+          name="ticker"
+          value={form.ticker}
+          onChange={handleInputChange}
+          required
+        />
+        <input
+          type="number"
+          className="form-control mb-2"
+          placeholder="Number of Shares"
+          name="shares"
+          value={form.shares}
+          onChange={handleInputChange}
+          required
+        />
+        <input
+          type="number"
+          className="form-control mb-2"
+          placeholder="Purchase Price"
+          name="purchasePrice"
+          value={form.purchasePrice}
+          onChange={handleInputChange}
+          required
+        />
+        <button type="submit" className="btn btn-primary">Add Stock</button>
+      </form>
+      {renderStocksTable()}
     </div>
   );
 }

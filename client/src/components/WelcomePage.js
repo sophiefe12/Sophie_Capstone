@@ -1,16 +1,47 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 
-function WelcomePage() {
+function WelcomePage({ isLoggedIn, onLogin }) { // Adjusted to accept props
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+
+  const handleLogin = async (event) => {
+    event.preventDefault();
+  
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/handle_login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // This is crucial for sessions to work
+        body: JSON.stringify({ username, password }),
+      });
+  
+      if (response.ok) {
+        const responseData = await response.json();
+        onLogin(); // Update the login state
+        setUsername(responseData.username);
+        console.log('Login successful:', responseData.message);
+        navigate(`/UserPortfolio/${responseData.user_id}`); // Navigate with the user_id
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error);
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+    }
+  };
+
   return (
     <div className="container-fluid bg-light py-5">
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-md-8">
             <div className="text-center mb-5">
-              {/* Logo with shadow */}
               <img
-                src="/logo_S.png" // Update the path to where your logo is stored
+                src="/logo_S.png" // Make sure the path to your logo is correct
                 alt="Stock Tracker Logo"
                 className="mb-3"
                 style={{ width: '100px', height: 'auto', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
@@ -18,14 +49,26 @@ function WelcomePage() {
               <h1 className="display-4">Welcome to the Stock Tracker</h1>
             </div>
             <div className="list-group">
-              <Link to="/user/user1" className="list-group-item list-group-item-action">
-                <h5>User 1</h5>
-                <p className="mb-0">View User 1's Portfolio</p>
-              </Link>
-              <Link to="/user/user2" className="list-group-item list-group-item-action">
-                <h5>User 2</h5>
-                <p className="mb-0">View User 2's Portfolio</p>
-              </Link>
+              <form onSubmit={handleLogin} className="mb-3">
+                <input
+                  type="text"
+                  className="form-control mb-2"
+                  placeholder="Username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+                <input
+                  type="password"
+                  className="form-control mb-2"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button type="submit" className="btn btn-primary w-100">Login</button>
+              </form>
+              <div className="text-center">
+                <Link to="/register" className="btn btn-secondary">Register here</Link>
+              </div>
             </div>
           </div>
         </div>

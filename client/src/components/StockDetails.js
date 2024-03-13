@@ -1,61 +1,110 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { Col, Row } from 'react-bootstrap';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 function StockDetails() {
-  // Retrieves the 'symbol' parameter from the URL using React Router's useParams hook.
   const { symbol } = useParams();
-  // Initializes the stockDetails state as an empty array.
   const [stockDetails, setStockDetails] = useState([]);
-  const [isLoading, setIsLoading] = useState(true); // Added a state to track loading status
+  const [isLoading, setIsLoading] = useState(true);
 
-
-  
-  // useEffect hook is used to perform side effects in the component. In this case, fetching stock details.
   useEffect(() => {
-    // Fetches stock details from the backend API using the stock symbol obtained from the URL.
-    fetch(`https://mcsbt-integration-sophie.ew.r.appspot.com/stock/${symbol}`)
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);  // Log the entire response
-        setStockDetails(data);
-        setIsLoading(false); // Set loading to false after data is loaded
-
-      })
-      .catch(error => {
+    const fetchStockDetails = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/stock/${symbol}`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        const sortedData = data
+          .map(detail => ({...detail, date: detail.date, closing_price: +detail.closing_price}))
+          .sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort data by date in descending order
+        setStockDetails(sortedData);
+      } catch (error) {
         console.error('Error fetching data:', error);
-        setIsLoading(false); // Set loading to false even if there's an error
-      });
+      }
+      setIsLoading(false);
+    };
+
+    fetchStockDetails();
   }, [symbol]);
 
-   // Render a spinner with custom navy blue color
+
   const renderSpinner = () => (
     <div className="text-center mt-5">
-      <div className="spinner-border" role="status" style={{ color: '#000080' }}> {/* Navy blue color */}
+      <div className="spinner-border" role="status" style={{ color: '#000080' }}>
         <span className="visually-hidden">Loading...</span>
       </div>
     </div>
   );
 
-  // Render the stock details with a custom navy blue header
-  const renderStockDetails = () => (
-    <>
-      <h2 className="mb-4" style={{ color: '#000080' }}>Stock Details for {symbol}</h2>
-      <div className="card shadow"> 
-        <ul className="list-group list-group-flush">
-          {stockDetails.map((detail, index) => (
-            <li key={index} className="list-group-item">
-              <span className="font-weight-bold">Month:</span> {detail.date}
-              <span className="font-weight-bold float-right">Closing Price: {detail.closing_price}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </>
+  const renderStockChart = () => (
+    <ResponsiveContainer width="100%" height={400}>
+      <LineChart
+        width={500}
+        height={300}
+        data={stockDetails}
+        margin={{
+          top: 5,
+          right: 30,
+          left: 20,
+          bottom: 5,
+        }}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="date" />
+        <YAxis />
+        <Tooltip />
+        <Legend />
+        <Line type="monotone" dataKey="closing_price" stroke="#8884d8" activeDot={{ r: 8 }} />
+      </LineChart>
+    </ResponsiveContainer>
   );
 
   return (
     <div className="container mt-5">
-      {isLoading ? renderSpinner() : renderStockDetails()}
+      <Row>
+        <Col md={6}>
+          {isLoading ? renderSpinner() : (
+            <>
+              <h2 className="mb-4" style={{ color: '#000080' }}>Stock Details for {symbol}</h2>
+              <div className="card shadow"> 
+                <ul className="list-group list-group-flush">
+                {stockDetails.map((detail, index) => (
+                  <li key={index} className="list-group-item">
+                    <span className="font-weight-bold">Date: </span> {detail.date}
+                    <span className="font-weight-bold float-right">Closing Price: </span>{detail.closing_price}€
+                  </li>
+                ))}
+                </ul>
+              </div>
+            </>
+          )}
+        </Col>
+        <Col md={6}>
+          {!isLoading && (
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart
+                data={stockDetails}
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="closing_price" stroke="#8884d8" activeDot={{ r: 8 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+        </Col>
+      </Row>
     </div>
   );
 }
