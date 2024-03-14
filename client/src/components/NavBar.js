@@ -6,18 +6,16 @@ const NavBar = ({ isLoggedIn, setIsLoggedIn }) => {
 
   const handleLogoutClick = async () => {
     try {
-      // Make sure REACT_APP_BACKEND_URL is set in your environment variables
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/logout`, {
-        method: 'POST', // Match this with your backend
-        credentials: 'include', // Required to send cookies
+        method: 'POST', 
+        credentials: 'include', 
       });
   
       if (response.ok) {
         console.log('Logout successful');
-        // Additional frontend cleanup if necessary
-        localStorage.removeItem('token'); // Assuming you are using token-based auth as well
+        localStorage.removeItem('token'); 
         setIsLoggedIn(false);
-        navigate('/'); // Redirect to the home page or login page
+        navigate('/'); 
       } else {
         console.error('Logout failed');
         alert('Logout failed. Please try again.');

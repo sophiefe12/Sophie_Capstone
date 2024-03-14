@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
-function WelcomePage({ isLoggedIn, onLogin }) { // Adjusted to accept props
+function WelcomePage({ isLoggedIn, onLogin }) { 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
@@ -15,16 +15,16 @@ function WelcomePage({ isLoggedIn, onLogin }) { // Adjusted to accept props
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // This is crucial for sessions to work
+        credentials: 'include', 
         body: JSON.stringify({ username, password }),
       });
   
       if (response.ok) {
         const responseData = await response.json();
-        onLogin(); // Update the login state
+        onLogin(); 
         setUsername(responseData.username);
         console.log('Login successful:', responseData.message);
-        navigate(`/UserPortfolio/${responseData.user_id}`); // Navigate with the user_id
+        navigate(`/UserPortfolio/${responseData.user_id}`); 
       } else {
         const errorData = await response.json();
         alert(errorData.error);
@@ -41,7 +41,7 @@ function WelcomePage({ isLoggedIn, onLogin }) { // Adjusted to accept props
           <div className="col-md-8">
             <div className="text-center mb-5">
               <img
-                src="/logo_S.png" // Make sure the path to your logo is correct
+                src="/logo_S.png"
                 alt="Stock Tracker Logo"
                 className="mb-3"
                 style={{ width: '100px', height: 'auto', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}

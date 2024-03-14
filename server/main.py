@@ -145,20 +145,15 @@ def get_user(user_id):
                 'purchase_price': stock.purchase_price
             })
 
-        # Optionally calculate overall ROI if desired
-        # overall_roi = ((total_current_value - total_investment) / total_investment) * 100 if total_investment > 0 else 0
-
         user_details = {
             'name': user.name,
             'total_investment': f"{total_investment:.2f}€",
             'stocks': stock_details,
-            # 'overall_roi': overall_roi,  # Include this if overall ROI calculation is desired
         }
 
         return jsonify(user_details)
     else:
         return jsonify({'error': 'User not found'}), 404
-
 
 
     
@@ -187,7 +182,7 @@ def add_stock(user_id):
     return jsonify({
         'message': 'Stock added successfully',
         'stock': {
-            'id': new_stock.id,  # Include the generated ID
+            'id': new_stock.id,  
             'name': company_name,
             'symbol': symbol,
             'current_price': latest_price,
@@ -212,7 +207,6 @@ def get_stock_details_from_alpha_vantage(symbol):
     company_name = search_data.get('bestMatches', [{}])[0].get('2. name', 'Unknown')
 
     return company_name, latest_price
-
 
 
 @app.route('/users/<int:user_id>/remove_stock/<int:stock_id>', methods=['DELETE'])
@@ -294,6 +288,7 @@ def get_stock(symbol):
         return jsonify(closing_prices), 200
     else:
         return jsonify({'error': 'Failed to fetch stock data'}), response.status_code
+
 
 @app.errorhandler(404)
 def resource_not_found(e):

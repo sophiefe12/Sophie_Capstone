@@ -34,12 +34,12 @@ function UserPortfolio({ isLoggedIn }) {
             id: stock.id,
             shares: parseInt(stock.shares, 10),
             purchase_price: `${parseFloat(stock.purchase_price).toFixed(2)}€`,
-            current_price: `${parseFloat(stock.current_price).toFixed(2)}€` // Assuming you have current_price in your response
+            current_price: `${parseFloat(stock.current_price).toFixed(2)}€` 
           }));
           
           const totalInvestment = updatedStocks.reduce((acc, curr) => acc + (curr.shares * parseFloat(curr.purchase_price)), 0);
   
-          // It's important to calculate ROI based on the data just fetched rather than relying on the potentially stale portfolio state
+          // Calculate ROI based on the data just fetched rather than relying on the potentially stale portfolio state
           const totalCurrentValue = (updatedStocks.reduce((acc, curr) => acc + (curr.shares * parseFloat(curr.current_price)), 0));
           const roi = totalInvestment > 0 ? ((totalCurrentValue - totalInvestment) / totalInvestment) * 100 : 0;
   
@@ -89,7 +89,7 @@ function UserPortfolio({ isLoggedIn }) {
           const stockResponse = await response.json();
           console.log('New stock response:', stockResponse);
           const newStock = {
-            id: stockResponse.stock.id, // Make sure to capture the 'id' from the response
+            id: stockResponse.stock.id, 
             ...stockResponse.stock,
             shares: parseInt(form.shares),
             purchase_price: `${parseFloat(form.purchasePrice).toFixed(2)}€`,
@@ -126,8 +126,8 @@ function UserPortfolio({ isLoggedIn }) {
     };
 
   const handleRemoveStock = async (stockId) => {
-    console.log('Stock ID:', stockId); // This should log a defined stock ID.
-    console.log('Attempting to remove stock with id:', stockId); // Add this line to log the stockId
+    console.log('Stock ID:', stockId);
+    console.log('Attempting to remove stock with id:', stockId); 
   try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/remove_stock/${stockId}`, {
         method: 'DELETE',

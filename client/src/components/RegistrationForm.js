@@ -15,14 +15,14 @@ function RegistrationForm() {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // This is crucial for sessions to work
+        credentials: 'include', 
         body: JSON.stringify({ username, password }),
       });
       const data = await response.json();
       if (response.ok) {
         navigate('/WelcomePage'); 
       } else {
-        alert(data.error); // Show an error message if registration fails
+        alert(data.error); 
       }
     } catch (error) {
       console.error('Error during registration:', error);
