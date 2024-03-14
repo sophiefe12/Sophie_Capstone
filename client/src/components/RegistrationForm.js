@@ -77,7 +77,7 @@ function RegistrationForm() {
                 <button type="submit" className="btn btn-primary btn-lg btn-block">Register</button>
               </form>
               <p className="mt-4 text-center">
-                Already have an account? <a href="/WelcomePage">Login here</a>
+              Already have an account? <Link to="/WelcomePage">Login here</Link>
               </p>
             </div>
           </div>
