@@ -19,7 +19,7 @@ function StockDetails() {
         const data = await response.json();
         const sortedData = data
           .map(detail => ({...detail, date: detail.date, closing_price: +detail.closing_price}))
-          .sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort data by date in descending order
+          .sort((a, b) => new Date(a.date) - new Date(b.date)); // Sort data by date in ascending order
         setStockDetails(sortedData);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -42,8 +42,6 @@ function StockDetails() {
   const renderStockChart = () => (
     <ResponsiveContainer width="100%" height={400}>
       <LineChart
-        width={500}
-        height={300}
         data={stockDetails}
         margin={{
           top: 5,
@@ -57,7 +55,7 @@ function StockDetails() {
         <YAxis />
         <Tooltip />
         <Legend />
-        <Line type="monotone" dataKey="closing_price" stroke="#8884d8" activeDot={{ r: 8 }} />
+        <Line type="monotone" dataKey="closing_price" stroke="#007bff" activeDot={{ r: 8 }} />
       </LineChart>
     </ResponsiveContainer>
   );

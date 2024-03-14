@@ -172,12 +172,10 @@ function UserPortfolio({ isLoggedIn }) {
                 <td>{stock.shares}</td>
                 <td>{stock.purchase_price}</td>
                 <td>{stock.current_price}</td>
-                {/* Calculate portfolio percentage based on total investment */}
                 <td>{((stock.shares * parseFloat(stock.purchase_price)) / totalInvestment * 100).toFixed(2)}%</td>
-                {/* Access totalInvestment from state (fixed the division by zero issue) */}
                 <td><Link to={`/stock_details/${stock.symbol}`}>{stock.symbol || 'N/A'}</Link></td>
                 <td>
-                  <button onClick={() => handleRemoveStock(stock.id)}>Remove</button>
+                  <button onClick={() => handleRemoveStock(stock.id)} className="btn btn-secondary">Remove</button>
                 </td>
               </tr>
             ))}
