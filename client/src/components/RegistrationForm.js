@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 function RegistrationForm() {
   const [username, setUsername] = useState('');
@@ -76,9 +76,9 @@ function RegistrationForm() {
                 </div>
                 <button type="submit" className="btn btn-primary btn-lg btn-block">Register</button>
               </form>
-              <p className="mt-4 text-center">
+              <div className="mt-4 text-center">
               Already have an account? <Link to="/WelcomePage">Login here</Link>
-              </p>
+              </div>
             </div>
           </div>
         </div>
