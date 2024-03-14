@@ -81,6 +81,19 @@ def handle_login():
         return jsonify({"error": "Invalid username or password"}), 401
     
 
+# @app.route("/is_logged_in")
+# def is_logged_in():
+#     if "user_id" in session:
+#         user_id = session["user_id"]
+#         user = User.query.get(user_id)
+#         if user:
+#             return jsonify({"username": user.name, "logged_in": True}), 200
+#         else:
+#             return jsonify({"error": "User not found. Please login again."}), 404
+#     else:
+#         return jsonify({"error": "Not logged in"}), 401
+    
+
 @app.route("/logout", methods=["POST"])
 def logout():
     print(session)  # Debug: Print the session to see what it contains

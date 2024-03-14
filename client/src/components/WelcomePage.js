@@ -21,18 +21,15 @@ function WelcomePage({ isLoggedIn, onLogin }) {
   
       if (response.ok) {
         const responseData = await response.json();
-        onLogin(); 
         setUsername(responseData.username);
         console.log('Login successful:', responseData.message);
-        navigate(`/UserPortfolio/${responseData.user_id}`); 
-      } else {
-        const errorData = await response.json();
-        alert(errorData.error);
+        navigate(`/UserPortfolio/${responseData.user_id}`);
       }
     } catch (error) {
       console.error('Error during login:', error);
     }
   };
+
 
   return (
     <div className="container-fluid bg-light py-5">
@@ -41,7 +38,7 @@ function WelcomePage({ isLoggedIn, onLogin }) {
           <div className="col-md-8">
             <div className="text-center mb-5">
               <img
-                src="/logo_S.png"
+                src="/logo_S.png" // Make sure the path to your logo is correct
                 alt="Stock Tracker Logo"
                 className="mb-3"
                 style={{ width: '100px', height: 'auto', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}

@@ -13,7 +13,7 @@ const NavBar = ({ isLoggedIn, setIsLoggedIn }) => {
   
       if (response.ok) {
         console.log('Logout successful');
-        localStorage.removeItem('token'); 
+        setTimeout(() => window.location.reload(), 100);
         setIsLoggedIn(false);
         navigate('/'); 
       } else {
