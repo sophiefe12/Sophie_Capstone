@@ -6,24 +6,6 @@ function RegistrationForm() {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    isUserLoggedIn();
-  }, []);
-
-  const isUserLoggedIn = () => {
-    fetch(`${process.env.REACT_APP_BACKEND_URL}/is_logged_in`, {
-      credentials: "include",
-    })
-    .then((response) => response.json())
-    .then((json) => {
-      if (json.logged_in) {
-        navigate('/user-portfolio'); 
-      }
-    })
-    .catch((error) => {
-      console.error('Error checking login status:', error);
-    });
-  };
 
   const handleRegister = async (event) => {
     event.preventDefault();

@@ -21,6 +21,7 @@ function WelcomePage({ isLoggedIn, onLogin }) {
   
       if (response.ok) {
         const responseData = await response.json();
+        onLogin(true, responseData.username);
         setUsername(responseData.username);
         console.log('Login successful:', responseData.message);
         navigate(`/UserPortfolio/${responseData.user_id}`);

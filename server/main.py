@@ -38,10 +38,6 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
-# app.config['SESSION_COOKIE_NAME'] = 'cookie'
-# app.config['SESSION_COOKIE_HTTPONLY'] = True
-# app.config['SESSION_COOKIE_SECURE'] = True  # Set to True if you're using HTTPS
-# app.config['SESSION_COOKIE_SAMESITE'] = None  # Can be 'Lax' or 'Strict'
 
 @app.route("/handle_register", methods=["POST"])
 def handle_register():
@@ -79,19 +75,6 @@ def handle_login():
         return jsonify({"message": "Login successful", "user_id": user.id}), 200
     else:
         return jsonify({"error": "Invalid username or password"}), 401
-    
-
-# @app.route("/is_logged_in")
-# def is_logged_in():
-#     if "user_id" in session:
-#         user_id = session["user_id"]
-#         user = User.query.get(user_id)
-#         if user:
-#             return jsonify({"username": user.name, "logged_in": True}), 200
-#         else:
-#             return jsonify({"error": "User not found. Please login again."}), 404
-#     else:
-#         return jsonify({"error": "Not logged in"}), 401
     
 
 @app.route("/logout", methods=["POST"])
