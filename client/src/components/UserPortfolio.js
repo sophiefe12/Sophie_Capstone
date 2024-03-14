@@ -28,8 +28,10 @@ function UserPortfolio({ isLoggedIn }) {
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}`);
         if (response.ok) {
           const data = await response.json();
+          console.log('Fetched portfolio data:', data);
           const updatedStocks = data.stocks.map(stock => ({
             ...stock,
+            id: stock.id,
             shares: parseInt(stock.shares, 10),
             purchase_price: `${parseFloat(stock.purchase_price).toFixed(2)}€`,
             current_price: `${parseFloat(stock.current_price).toFixed(2)}€` // Assuming you have current_price in your response
@@ -85,15 +87,31 @@ function UserPortfolio({ isLoggedIn }) {
         });
         if (response.ok) {
           const stockResponse = await response.json();
+          console.log('New stock response:', stockResponse);
           const newStock = {
+            id: stockResponse.stock.id, // Make sure to capture the 'id' from the response
             ...stockResponse.stock,
             shares: parseInt(form.shares),
             purchase_price: `${parseFloat(form.purchasePrice).toFixed(2)}€`,
           };
-          setPortfolio(prevPortfolio => ({
-            ...prevPortfolio,
-            stocks: [...prevPortfolio.stocks, newStock],
-          }));
+          const updatedTotalInvestment = totalInvestment + (newStock.shares * parseFloat(newStock.purchase_price));
+
+          setPortfolio(prevPortfolio => {
+            const updatedStocks = [...prevPortfolio.stocks, newStock].map(stock => ({
+              ...stock,
+              portfolio_percentage: updatedTotalInvestment > 0 ? ((stock.shares * parseFloat(stock.purchase_price)) / updatedTotalInvestment * 100).toFixed(2) : '0.00',
+            }));
+            
+            return {
+              ...prevPortfolio,
+              stocks: updatedStocks,
+              total_investment: `${updatedTotalInvestment.toFixed(2)}€`
+            };
+          });
+
+          console.log(updatedStocks);
+
+          setTotalInvestment(updatedTotalInvestment);
           setForm({
             ticker: '',
             shares: '',
@@ -108,16 +126,18 @@ function UserPortfolio({ isLoggedIn }) {
     };
 
   const handleRemoveStock = async (stockId) => {
-    try {
+    console.log('Stock ID:', stockId); // This should log a defined stock ID.
+    console.log('Attempting to remove stock with id:', stockId); // Add this line to log the stockId
+  try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/remove_stock/${stockId}`, {
         method: 'DELETE',
       });
       console.log('Response:', response);
       if (response.ok) {
-        setPortfolio(prevPortfolio => ({
-          ...prevPortfolio,
-          stocks: prevPortfolio.stocks.filter(stock => stock.id !== stockId),
-        }));
+        setPortfolio(prevPortfolio => {
+          const updatedStocks = prevPortfolio.stocks.filter(stock => stock.id !== stockId);
+          return { ...prevPortfolio, stocks: updatedStocks };
+        });
       } else {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to remove the stock');
@@ -169,9 +189,15 @@ function UserPortfolio({ isLoggedIn }) {
 
   return (
     <div className="container mt-5">
-      <h2>{portfolio.username ? `${portfolio.username}'s Portfolio` : "User's Portfolio"}</h2>
-      <h3 style={{ color: '#000080' }}>Total Initial Investment: {totalInvestment.toFixed(2)}€</h3>
-      <h3 style={{ color: 'green' }}>ROI: {portfolio.roi}</h3>
+      <h1>{portfolio.username ? `${portfolio.username}'s Portfolio` : "User's Portfolio"}</h1>
+      <div className="row align-items-end">
+        <div className="col">
+          <h2 style={{ color: '#000080' }}>Total Initial Investment: {totalInvestment.toFixed(2)}€</h2>
+        </div>
+        <div className="col">
+          <h2 style={{ color: 'blue' }}>ROI: {portfolio.roi}</h2>
+        </div>
+      </div>
       <form onSubmit={handleAddStockSubmit} className="mb-3">
         <input
           type="text"

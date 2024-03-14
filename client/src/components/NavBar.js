@@ -28,7 +28,7 @@ const NavBar = ({ isLoggedIn, setIsLoggedIn }) => {
     }
   };
 
-  
+
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
       <Link className="navbar-brand" to="/">Home</Link>
@@ -40,12 +40,6 @@ const NavBar = ({ isLoggedIn, setIsLoggedIn }) => {
             </li>
           ) : (
             <>
-              <li className="nav-item">
-                <Link className="nav-link" to="/WelcomePage">Login</Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/register">Register</Link>
-              </li>
             </>
           )}
         </ul>

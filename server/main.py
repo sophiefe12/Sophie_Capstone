@@ -134,6 +134,7 @@ def get_user(user_id):
             company_name, _ = get_stock_details_from_alpha_vantage(stock.symbol)
 
             stock_details.append({
+                'id': stock.id,  # Include the stock's ID here
                 'symbol': stock.symbol,
                 'name': company_name,  # Include the stock's company name
                 'current_price': latest_price,
@@ -179,15 +180,17 @@ def add_stock(user_id):
         shares=data['shares'],
         purchase_price=data['purchase_price']
     )
-    
+
     db.session.add(new_stock)
     db.session.commit()
+
     return jsonify({
         'message': 'Stock added successfully',
         'stock': {
+            'id': new_stock.id,  # Include the generated ID
             'name': company_name,
             'symbol': symbol,
-            'current_price': latest_price
+            'current_price': latest_price,
         }
     }), 201
 

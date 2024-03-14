@@ -20,7 +20,7 @@ function RegistrationForm() {
       });
       const data = await response.json();
       if (response.ok) {
-        navigate('./WelcomePage'); 
+        navigate('/WelcomePage'); 
       } else {
         alert(data.error); // Show an error message if registration fails
       }
@@ -30,19 +30,40 @@ function RegistrationForm() {
   };
 
   return (
-    <div>
-      <h2>Register</h2>
-      <form onSubmit={handleRegister}>
-        <label>
-          Username:
-          <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
-        </label>
-        <label>
-          Password:
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        </label>
-        <button type="submit">Register</button>
-      </form>
+    <div className="container">
+      <div className="row justify-content-center align-items-center" style={{ height: '80vh' }}>
+        <div className="col-md-6">
+          <div className="card p-4">
+            <div className="card-body">
+              <h2 className="text-center mb-4">Welcome to the Stock Tracker</h2>
+              <form onSubmit={handleRegister}>
+                <div className="form-group mb-3">
+                  <input 
+                    type="text" 
+                    className="form-control form-control-lg" 
+                    value={username} 
+                    onChange={(e) => setUsername(e.target.value)} 
+                    placeholder="Username" 
+                  />
+                </div>
+                <div className="form-group mb-3">
+                  <input 
+                    type="password" 
+                    className="form-control form-control-lg" 
+                    value={password} 
+                    onChange={(e) => setPassword(e.target.value)} 
+                    placeholder="Password" 
+                  />
+                </div>
+                <button type="submit" className="btn btn-primary btn-lg btn-block">Register</button>
+              </form>
+              <p className="mt-4 text-center">
+                Already have an account? <a href="/login">Login here</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
