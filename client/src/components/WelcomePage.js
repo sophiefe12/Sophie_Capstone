@@ -13,7 +13,7 @@ const WelcomePage = ({ onLogin }) => {
       if (loginResponse) {
         // Extract the userId from the loginResponse
         const userId = loginResponse.user_id;
-        navigate(`/UserPortfolio/${userId}`); // Navigate using the user ID
+        navigate(`/UserPortfolio`); // Navigate using the user ID
       }
     } catch (error) {
       // Handle the login failure error here

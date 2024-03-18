@@ -80,7 +80,6 @@ const handleLogout = useCallback(async () => {
       setUserId(null); // If you are storing user ID in the state
       localStorage.removeItem('token');
       // Clear the cookie named 'session' on the client side
-      document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
       // Add any additional cleanup here
     } else {
       throw new Error('Logout failed');
@@ -106,7 +105,7 @@ const handleLogout = useCallback(async () => {
         <Route path="/register" element={<RegistrationForm />} />
         {isLoggedIn && (
           <>
-            <Route path="/UserPortfolio/:userId" element={<UserPortfolio isLoggedIn={isLoggedIn} />} />
+            <Route path="/UserPortfolio/" element={<UserPortfolio isLoggedIn={isLoggedIn} />} />
             <Route path="/stock_details/:symbol" element={<StockDetails />} />
           </>
         )}

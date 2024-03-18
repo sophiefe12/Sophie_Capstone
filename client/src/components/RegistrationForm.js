@@ -13,6 +13,7 @@ function RegistrationForm() {
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/handle_register`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },

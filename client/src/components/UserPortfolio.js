@@ -19,13 +19,16 @@ function UserPortfolio({ isLoggedIn }) {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      navigate('/welcomepage');
+      navigate('/WelcomePage');
       return;
     }
 
     const fetchPortfolioData = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}`);
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users`, {
+          method: 'GET',
+          credentials: 'include', 
+        })
         if (response.ok) {
           const data = await response.json();
           console.log('Fetched portfolio data:', data);
@@ -76,6 +79,7 @@ function UserPortfolio({ isLoggedIn }) {
       try {
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/add_stock`, {
           method: 'POST',
+          credentials: "include",
           headers: {
             'Content-Type': 'application/json',
           },
@@ -131,6 +135,7 @@ function UserPortfolio({ isLoggedIn }) {
   try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/remove_stock/${stockId}`, {
         method: 'DELETE',
+        credentials: "include"
       });
       console.log('Response:', response);
       if (response.ok) {

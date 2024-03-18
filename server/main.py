@@ -16,8 +16,9 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
 app.config['SECRET_KEY'] = 'f9bf78b9a18ce6d46a0cd2b0b86df9da'
-app.config['SESSION_COOKIE_HTTPONLY'] = True
 
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+app.config['SESSION_COOKIE_SECURE'] = True
 
 un = 'ADMIN'
 pw = 'Capstone2024'
@@ -56,7 +57,7 @@ def handle_register():
     db.session.add(new_user)
     db.session.commit()
 
-    session['user_id'] = new_user.id
+    # session['user_id'] = new_user.id
     return jsonify({"message": "User registered and logged in successfully", "user_id": new_user.id}), 201
 
 
@@ -70,9 +71,9 @@ def handle_login():
     user = User.query.filter_by(name=username).first()
 
     if user and user.hashed_password == hashed_password:
+        session.permanent = True
         session['user_id'] = user.id
-        session.modified = True  # Makes the session persistent
-        #session.permanent = True
+        # session.modified = True  # Makes the session persistent
         return jsonify({"message": "Login successful", "user_id": user.id}), 200
     else:
         return jsonify({"error": "Invalid username or password"}), 401
@@ -80,10 +81,10 @@ def handle_login():
 
 @app.route("/logout", methods=["POST"])
 def logout():
+    print("HERE IS", session)
     if 'user_id' in session:
         session.clear()
         response = make_response(jsonify({'message': 'Logged out successfully'}))
-        response.set_cookie('session', '', expires=0)
         return response, 200
     else:
         return jsonify({'error': 'No user is currently logged in.'}), 401
@@ -93,7 +94,9 @@ def logout():
 def is_logged_in():
     print(request.headers)
     if 'user_id' in session:
-        user_id = session['user_id']
+        # user_id = session['user_id']
+        user_id = session.get("user_id")
+        print(user_id)
         user = User.query.get(user_id)
         if user:
             return jsonify({"username": user.name, "logged_in": True})
@@ -122,8 +125,9 @@ def get_latest_stock_price(symbol):
 
 
 # Define a route to get details of a specific user including their stocks and investments
-@app.route('/users/<int:user_id>', methods=['GET'])
-def get_user(user_id):
+@app.route('/users', methods=['GET'])
+def get_user():
+    user_id =  session.get('user_id')
     user = User.query.get(user_id)
     if user:
         stocks = Stock.query.filter_by(user_id=user.id).all()
@@ -172,8 +176,9 @@ def get_user(user_id):
 
 
     
-@app.route('/users/<int:user_id>/add_stock', methods=['POST'])
-def add_stock(user_id):
+@app.route('/users/add_stock', methods=['POST'])
+def add_stock():
+    user_id =  session.get('user_id')
     data = request.json
     symbol = data['symbol']
 
@@ -224,8 +229,9 @@ def get_stock_details_from_alpha_vantage(symbol):
     return company_name, latest_price
 
 
-@app.route('/users/<int:user_id>/remove_stock/<int:stock_id>', methods=['DELETE'])
-def remove_stock(user_id, stock_id):
+@app.route('/users/remove_stock/<int:stock_id>', methods=['DELETE'])
+def remove_stock(stock_id):
+    user_id = session.get('user_id')
     stock = Stock.query.filter_by(id=stock_id, user_id=user_id).first()
     if stock:
         db.session.delete(stock)

@@ -12,7 +12,10 @@ function StockDetails() {
     const fetchStockDetails = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/stock/${symbol}`);
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/stock/${symbol}`, {
+          method: 'GET',
+          credentials: 'include', 
+        })
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }

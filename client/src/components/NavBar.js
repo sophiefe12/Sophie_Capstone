@@ -11,10 +11,12 @@ const NavBar = ({ isLoggedIn, onLogout }) => {
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
-      <Link className="navbar-brand" to="/">Home</Link>
       {/* Other navigation items */}
       {isLoggedIn && (
-        <button onClick={handleLogoutClick} className="nav-link" style={{ border: 'none', background: 'none' }}>Logout</button>
+        <>
+          <Link className="navbar-brand" to="/UserPortfolio">Portfolio Overview</Link>
+          <button onClick={handleLogoutClick} className="nav-link" style={{ border: 'none', background: 'none' }}>Logout</button>
+        </>
       )}
     </nav>
   );
