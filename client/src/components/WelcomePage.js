@@ -1,36 +1,25 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
-function WelcomePage({ isLoggedIn, onLogin }) { 
+const WelcomePage = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (event) => {
     event.preventDefault();
-  
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/handle_login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', 
-        body: JSON.stringify({ username, password }),
-      });
-  
-      if (response.ok) {
-        const responseData = await response.json();
-        onLogin(true, responseData.username);
-        setUsername(responseData.username);
-        console.log('Login successful:', responseData.message);
-        navigate(`/UserPortfolio/${responseData.user_id}`);
+      const loginResponse = await onLogin(username, password);
+      if (loginResponse) {
+        // Extract the userId from the loginResponse
+        const userId = loginResponse.user_id;
+        navigate(`/UserPortfolio/${userId}`); // Navigate using the user ID
       }
     } catch (error) {
-      console.error('Error during login:', error);
+      // Handle the login failure error here
+      console.error('Login failed:', error);
     }
   };
-
 
   return (
     <div className="container-fluid bg-light py-5">

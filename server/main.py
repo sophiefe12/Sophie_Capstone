@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify, session, make_response
 from flask_cors import CORS
 from models import db, User, Stock  # Import from models.py
 from sqlalchemy.pool import NullPool
@@ -16,6 +16,7 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
 app.config['SECRET_KEY'] = 'f9bf78b9a18ce6d46a0cd2b0b86df9da'
+app.config['SESSION_COOKIE_HTTPONLY'] = True
 
 
 un = 'ADMIN'
@@ -71,7 +72,7 @@ def handle_login():
     if user and user.hashed_password == hashed_password:
         session['user_id'] = user.id
         session.modified = True  # Makes the session persistent
-        session.permanent = True
+        #session.permanent = True
         return jsonify({"message": "Login successful", "user_id": user.id}), 200
     else:
         return jsonify({"error": "Invalid username or password"}), 401
@@ -79,12 +80,30 @@ def handle_login():
 
 @app.route("/logout", methods=["POST"])
 def logout():
-    print(session)  # Debug: Print the session to see what it contains
     if 'user_id' in session:
         session.clear()
-        return jsonify({'message': 'Logged out successfully'}), 200
+        response = make_response(jsonify({'message': 'Logged out successfully'}))
+        response.set_cookie('session', '', expires=0)
+        return response, 200
     else:
         return jsonify({'error': 'No user is currently logged in.'}), 401
+
+
+@app.route("/is_logged_in", methods=["GET"])
+def is_logged_in():
+    print(request.headers)
+    if 'user_id' in session:
+        user_id = session['user_id']
+        user = User.query.get(user_id)
+        if user:
+            return jsonify({"username": user.name, "logged_in": True})
+        else:
+            # The user_id was in the session, but no user was found in the database.
+            # This could indicate a stale session, so we clear it for safety.
+            session.clear()
+            return jsonify({"message": "No user found, session cleared."}), 400
+    else:
+        return jsonify({"message": "Not logged in, or no cookie being attached."}), 400
 
 
 # fetch the latest stock price from the Alpha Vantage API
