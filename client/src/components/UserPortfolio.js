@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import NavBar from './NavBar';
 
-function UserPortfolio({ isLoggedIn }) {
+function UserPortfolio({ isLoggedIn, addNotification }) {
   const { userId } = useParams();
   const navigate = useNavigate();
   const [totalInvestment, setTotalInvestment] = useState(0);
+
   const [portfolio, setPortfolio] = useState({
     username: '',
     stocks: [],
@@ -20,15 +22,15 @@ function UserPortfolio({ isLoggedIn }) {
   useEffect(() => {
     if (!isLoggedIn) {
       navigate('/WelcomePage');
-      return;
     }
-
+  
+    // Define the function inside the useEffect or outside the component
     const fetchPortfolioData = async () => {
       try {
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users`, {
           method: 'GET',
-          credentials: 'include', 
-        })
+          credentials: 'include',
+        });
         if (response.ok) {
           const data = await response.json();
           console.log('Fetched portfolio data:', data);
@@ -37,13 +39,12 @@ function UserPortfolio({ isLoggedIn }) {
             id: stock.id,
             shares: parseInt(stock.shares, 10),
             purchase_price: `${parseFloat(stock.purchase_price).toFixed(2)}€`,
-            current_price: `${parseFloat(stock.current_price).toFixed(2)}€` 
+            current_price: `${parseFloat(stock.current_price).toFixed(2)}€`,
           }));
-          
+  
           const totalInvestment = updatedStocks.reduce((acc, curr) => acc + (curr.shares * parseFloat(curr.purchase_price)), 0);
   
-          // Calculate ROI based on the data just fetched rather than relying on the potentially stale portfolio state
-          const totalCurrentValue = (updatedStocks.reduce((acc, curr) => acc + (curr.shares * parseFloat(curr.current_price)), 0));
+          const totalCurrentValue = updatedStocks.reduce((acc, curr) => acc + (curr.shares * parseFloat(curr.current_price)), 0);
           const roi = totalInvestment > 0 ? ((totalCurrentValue - totalInvestment) / totalInvestment) * 100 : 0;
   
           setPortfolio(prevPortfolio => ({
@@ -51,7 +52,7 @@ function UserPortfolio({ isLoggedIn }) {
             ...data,
             stocks: updatedStocks,
             username: data.name,
-            roi: `${roi.toFixed(2)}%`
+            roi: `${roi.toFixed(2)}%`,
           }));
   
           setTotalInvestment(totalInvestment);
@@ -63,6 +64,7 @@ function UserPortfolio({ isLoggedIn }) {
       }
     };
   
+    // Then, call the function
     fetchPortfolioData();
   }, [userId, isLoggedIn, navigate]);
 
@@ -77,7 +79,7 @@ function UserPortfolio({ isLoggedIn }) {
     const handleAddStockSubmit = async (e) => {
       e.preventDefault();
       try {
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/add_stock`, {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/add_stock`, {
           method: 'POST',
           credentials: "include",
           headers: {
@@ -92,11 +94,13 @@ function UserPortfolio({ isLoggedIn }) {
         if (response.ok) {
           const stockResponse = await response.json();
           console.log('New stock response:', stockResponse);
+          addNotification('Congratulations! Stock added successfully.');
           const newStock = {
             id: stockResponse.stock.id, 
             ...stockResponse.stock,
             shares: parseInt(form.shares),
             purchase_price: `${parseFloat(form.purchasePrice).toFixed(2)}€`,
+
           };
           const updatedTotalInvestment = totalInvestment + (newStock.shares * parseFloat(newStock.purchase_price));
 
@@ -113,8 +117,6 @@ function UserPortfolio({ isLoggedIn }) {
             };
           });
 
-          console.log(updatedStocks);
-
           setTotalInvestment(updatedTotalInvestment);
           setForm({
             ticker: '',
@@ -126,20 +128,22 @@ function UserPortfolio({ isLoggedIn }) {
         }
       } catch (error) {
         console.error('Error adding stock:', error);
+        setNotifications((prevNotifications) => [...prevNotifications, 'Error adding stock.']);
+
       }
     };
 
   const handleRemoveStock = async (stockId) => {
-    console.log('Stock ID:', stockId);
     console.log('Attempting to remove stock with id:', stockId); 
   try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/${userId}/remove_stock/${stockId}`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/users/remove_stock/${stockId}`, {
         method: 'DELETE',
         credentials: "include"
       });
       console.log('Response:', response);
       if (response.ok) {
         setPortfolio(prevPortfolio => {
+          addNotification('Stock removed successfully.');
           const updatedStocks = prevPortfolio.stocks.filter(stock => stock.id !== stockId);
           return { ...prevPortfolio, stocks: updatedStocks };
         });
@@ -150,6 +154,16 @@ function UserPortfolio({ isLoggedIn }) {
     } catch (error) {
       console.error('Error removing stock:', error);
     }
+  };
+
+  const Notification = ({ message }) => {
+    if (!message) return null;
+  
+    return (
+      <div className="alert alert-info" role="alert">
+        {message}
+      </div>
+    );
   };
 
   const renderStocksTable = () => {

@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify, session, make_response
 from flask_cors import CORS
 from models import db, User, Stock  # Import from models.py
 from sqlalchemy.pool import NullPool
-from datetime import timedelta
 import requests
 import os
 import oracledb
@@ -57,7 +56,6 @@ def handle_register():
     db.session.add(new_user)
     db.session.commit()
 
-    # session['user_id'] = new_user.id
     return jsonify({"message": "User registered and logged in successfully", "user_id": new_user.id}), 201
 
 
@@ -73,7 +71,6 @@ def handle_login():
     if user and user.hashed_password == hashed_password:
         session.permanent = True
         session['user_id'] = user.id
-        # session.modified = True  # Makes the session persistent
         return jsonify({"message": "Login successful", "user_id": user.id}), 200
     else:
         return jsonify({"error": "Invalid username or password"}), 401
@@ -92,7 +89,6 @@ def logout():
 
 @app.route("/is_logged_in", methods=["GET"])
 def is_logged_in():
-    print(request.headers)
     if 'user_id' in session:
         # user_id = session['user_id']
         user_id = session.get("user_id")
@@ -175,7 +171,6 @@ def get_user():
         return jsonify({'error': 'User not found'}), 404
 
 
-    
 @app.route('/users/add_stock', methods=['POST'])
 def add_stock():
     user_id =  session.get('user_id')
@@ -311,13 +306,13 @@ def get_stock(symbol):
         return jsonify({'error': 'Failed to fetch stock data'}), response.status_code
 
 
-@app.errorhandler(404)
-def resource_not_found(e):
-    return jsonify(error=str(e)), 404
+# @app.errorhandler(404)
+# def resource_not_found(e):
+#     return jsonify(error=str(e)), 404
 
-@app.errorhandler(500)
-def server_error(e):
-    return jsonify(error=str(e)), 500
+# @app.errorhandler(500)
+# def server_error(e):
+#     return jsonify(error=str(e)), 500
 
 @app.before_request
 def before_request():

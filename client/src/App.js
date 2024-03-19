@@ -12,6 +12,10 @@ const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState(null);
   const [username, setUsername] = useState('');
+  const [notifications, setNotifications] = useState([]);
+  const clearNotifications = () => setNotifications([]);
+
+
 
   useEffect(() => {
     const checkLoggedIn = async () => {
@@ -38,6 +42,10 @@ const App = () => {
 
     checkLoggedIn();
   }, []);
+
+  const addNotification = (message) => {
+    setNotifications((prevNotifications) => [...prevNotifications, message]);
+  };
 
 const handleLogin = useCallback(async (username, password) => {
   try {
@@ -90,22 +98,19 @@ const handleLogout = useCallback(async () => {
     setUsername('');
     setUserId(null); // If you are storing user ID in the state
     localStorage.removeItem('token');
-    // Attempt to clear the cookie even in the event of an error
-    document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
-    // Add any additional error handling here
   }
 }, []);
 
   return (
     <Router>
-      <NavBar isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+      <NavBar isLoggedIn={isLoggedIn} onLogout={handleLogout} notifications={notifications} clearNotifications={clearNotifications} />
       <Routes>
         <Route path="/" element={<WelcomePage isLoggedIn={isLoggedIn} onLogin={handleLogin} />} />
         <Route path="/WelcomePage" element={<WelcomePage isLoggedIn={isLoggedIn} onLogin={handleLogin} />} />
         <Route path="/register" element={<RegistrationForm />} />
         {isLoggedIn && (
           <>
-            <Route path="/UserPortfolio/" element={<UserPortfolio isLoggedIn={isLoggedIn} />} />
+        <Route path="/UserPortfolio/" element={<UserPortfolio isLoggedIn={isLoggedIn} addNotification={addNotification} />} />
             <Route path="/stock_details/:symbol" element={<StockDetails />} />
           </>
         )}
