@@ -1,0 +1,77 @@
+/* Container for the stock details */
+.stock-details-container {
+    max-width: 100%;
+    margin: 40px;
+  }
+  /* Header styles */
+  .stock-details-header {
+    color: #2a4d69;
+    margin-bottom: 30px;
+    font-size: 1.8rem;
+    font-weight: bold;
+  }
+
+  /* Card styles */
+  .stock-details-card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .stock-details-header,
+  .stock-details-card {
+  text-align: center;
+}
+  
+  .stock-details-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .stock-details-list-item {
+    font-size: 1.18rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #eaecef;
+  }
+  
+  .stock-details-list-item:last-child {
+    border-bottom: none;
+  }
+  
+  .stock-details-list-item span {
+    font-size: 1.2rem;
+    color: #2a4d69;
+    font-weight: bold;
+  }
+  
+  /* Chart styles */
+  .stock-chart-container {
+    height: 500px; /* Set a fixed height or as needed */
+    margin: 80px; /* Center the chart container */
+  }
+
+  .recharts-responsive-container {
+    display: flex;
+    justify-content: center;
+  }
+
+  /* Loading spinner */
+  .spinner-border {
+    width: 3rem;
+    height: 3rem;
+    color: #2a4d69;
+  }
+  
+  /* Responsive grid */
+  @media (min-width: 768px) {
+    .stock-details-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+  }
+
+ 

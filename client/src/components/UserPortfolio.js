@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import './UserPortfolio.css'; 
 
 function UserPortfolio({ isLoggedIn, addNotification }) {
   const { userId } = useParams();
@@ -217,17 +218,17 @@ function UserPortfolio({ isLoggedIn, addNotification }) {
   };
 
   return (
-    <div className="container mt-5">
-      <h1>{portfolio.username ? `${portfolio.username}'s Portfolio` : "User's Portfolio"}</h1>
-      <div className="row align-items-end">
-        <div className="col">
-          <h2 style={{ color: '#000080' }}>Total Initial Investment: {totalInvestment.toFixed(2)}€</h2>
+      <div className="container mt-5 user-portfolio-container">
+        <h1 className="user-portfolio-header">{portfolio.username ? `${portfolio.username}'s Portfolio` : "User's Portfolio"}</h1>
+        <div className="row align-items-end investment-roi-container">
+          <div className="col">
+            <h2 className="investment-roi">Total Initial Investment: {totalInvestment.toFixed(2)}€</h2>
+          </div>
+          <div className="col">
+            <h2 className="investment-roi">ROI: {portfolio.roi}</h2>
+          </div>
         </div>
-        <div className="col">
-          <h2 style={{ color: 'blue' }}>ROI: {portfolio.roi}</h2>
-        </div>
-      </div>
-      <form onSubmit={handleAddStockSubmit} className="mb-3">
+        <form onSubmit={handleAddStockSubmit} className="add-stock-form">
         <input
           type="text"
           className="form-control mb-2"

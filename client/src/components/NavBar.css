@@ -1,0 +1,79 @@
+
+.navBar {
+    background-color: #1e3047; /* Dark blue */
+    color: #d4d4d9; /* Light gray */
+  }
+  
+  .nav-link {
+    color: #d4d4d9;
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 0 10px;
+    transition: color 0.3s;
+  }
+  
+  .nav-link:hover {
+    color: #fff;
+    text-decoration: none;
+  }
+  
+  .logoutButton {
+    background: none;
+    border: none;
+    color: #d4d4d9;
+    cursor: pointer;
+  }
+  
+  .logoutButton:hover {
+    text-decoration: underline;
+  }
+  
+  .notificationBell {
+    position: relative;
+    font-size: 1.6em;
+    color: d4d4d9;
+    cursor: pointer;
+    margin-right: 1em;
+  }
+  
+  .notificationCounter {
+    position: absolute;
+    top: -5px; /* Adjust as needed to position the badge above the bell icon */
+    right: -5px;
+    background: red;
+    color: white;
+    border-radius: 50%;
+    padding: 0.25em;
+    font-size: 0.45em;
+    line-height: 1em;
+    min-width: 1.5em;
+    height: 1.5em;
+    text-align: center;
+    z-index: 2;
+  }
+  .notification-dropdown {
+    position: absolute;
+    top: 100%; /* Position just below the bell icon */
+    right: 0;
+    width: 350px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+  }
+  
+  .notificationItem {
+    padding: 10px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #434040;
+    color: #434040;
+    font-size: 1rem;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .linkStyle, .linkStyle:visited, .linkStyle:hover, .linkStyle:active, .linkStyle:focus {
+    color: d4d4d9 !important;
+    background-color: transparent !important;
+  }
+  

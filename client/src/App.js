@@ -15,7 +15,7 @@ const App = () => {
   const [notifications, setNotifications] = useState([]);
   const clearNotifications = () => setNotifications([]);
 
-
+ 
   useEffect(() => {
     const checkLoggedIn = async () => {
       try {

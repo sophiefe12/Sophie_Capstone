@@ -1,0 +1,122 @@
+/* Main container */
+.user-portfolio-container {
+    max-width: 95%;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    margin: 40px;
+  }
+  
+  /* Headers */
+  .user-portfolio-header {
+    color: #1e3047;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  /* Investment and ROI */
+  .investment-roi-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .investment-roi {
+    font-size: 1.5rem; 
+    font-weight: bold;
+    color: #4e73df;
+    background: ( #d4d4d9);
+    padding: 15px; /* Increased padding for more presence */
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+  }
+  
+  /* Form styles */
+  .add-stock-form {
+    background: #f8f9fa;
+    padding: 15px; 
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    width: 80%; /* Reduce width */
+    margin-left: auto; /* Center form */
+    margin-right: auto; /* Center form */
+  }
+  
+  .add-stock-form input {
+    margin-bottom: 20px;
+  }
+  
+  .add-stock-form button {
+    width: 100%;
+    padding: 10px;
+    background-color: #1e3047;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .add-stock-form button:hover {
+    background-color: #314b93;
+  }
+  
+  /* Table styles */
+  .stocks-table {
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .stocks-table thead {
+    background-color: #1e3047;
+    color: white;
+  }
+  
+  .stocks-table thead th {
+    padding: 10px;
+    text-align: left;
+  }
+  
+  .stocks-table tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .stocks-table tbody tr:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .stocks-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  /* Notification styles */
+  .alert-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 20px 0;
+  }
+  
+  /* Links and buttons */
+  .stock-link, .remove-stock-btn {
+    text-decoration: none;
+    color: #4e73df;
+  }
+  
+  .remove-stock-btn {
+    background: none;
+    border: 1px solid #dc3545;
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: #dc3545;
+    cursor: pointer;
+  }
+  
+  .remove-stock-btn:hover {
+    background-color: #dc3545;
+    color: white;
+  }
+  

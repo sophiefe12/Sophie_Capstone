@@ -57,7 +57,7 @@ function RegistrationForm() {
                     placeholder="Password" 
                   />
                 </div>
-                <button type="submit" className="btn btn-primary btn-lg btn-block">Register</button>
+                <button type="submit" className="btn btn-primary btn-lg btn-block" style={{ backgroundColor: '#4e73df', color: 'white' }} >Register</button>
               </form>
               <div className="mt-4 text-center">
               Already have an account? <Link to="/WelcomePage">Login here</Link>
