@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import NavBar from './NavBar';
 
 function UserPortfolio({ isLoggedIn, addNotification }) {
   const { userId } = useParams();
@@ -68,6 +67,20 @@ function UserPortfolio({ isLoggedIn, addNotification }) {
     fetchPortfolioData();
   }, [userId, isLoggedIn, navigate]);
 
+  const calculateTotalsAndROI = (stocks) => {
+    const totalInvestmentCalc = stocks.reduce((acc, curr) => acc + (curr.shares * parseFloat(curr.purchase_price)), 0);
+    const totalCurrentValue = stocks.reduce((acc, curr) => acc + (curr.shares * parseFloat(curr.current_price)), 0);
+    const roiCalc = totalInvestmentCalc > 0 ? ((totalCurrentValue - totalInvestmentCalc) / totalInvestmentCalc) * 100 : 0;
+  
+    setTotalInvestment(totalInvestmentCalc);
+    setPortfolio(prevPortfolio => ({
+      ...prevPortfolio,
+      stocks: stocks,
+      total_investment: `${totalInvestmentCalc.toFixed(2)}€`,
+      roi: `${roiCalc.toFixed(2)}%`,
+    }));
+  };
+
     const handleInputChange = (e) => {
       const { name, value } = e.target;
       setForm(prevForm => ({
@@ -105,19 +118,14 @@ function UserPortfolio({ isLoggedIn, addNotification }) {
           const updatedTotalInvestment = totalInvestment + (newStock.shares * parseFloat(newStock.purchase_price));
 
           setPortfolio(prevPortfolio => {
-            const updatedStocks = [...prevPortfolio.stocks, newStock].map(stock => ({
-              ...stock,
-              portfolio_percentage: updatedTotalInvestment > 0 ? ((stock.shares * parseFloat(stock.purchase_price)) / updatedTotalInvestment * 100).toFixed(2) : '0.00',
-            }));
-            
+            const updatedStocks = [...prevPortfolio.stocks, newStock];
+            calculateTotalsAndROI(updatedStocks);
             return {
               ...prevPortfolio,
               stocks: updatedStocks,
-              total_investment: `${updatedTotalInvestment.toFixed(2)}€`
             };
           });
 
-          setTotalInvestment(updatedTotalInvestment);
           setForm({
             ticker: '',
             shares: '',
@@ -145,7 +153,11 @@ function UserPortfolio({ isLoggedIn, addNotification }) {
         setPortfolio(prevPortfolio => {
           addNotification('Stock removed successfully.');
           const updatedStocks = prevPortfolio.stocks.filter(stock => stock.id !== stockId);
-          return { ...prevPortfolio, stocks: updatedStocks };
+          calculateTotalsAndROI(updatedStocks);
+          return {
+            ...prevPortfolio,
+            stocks: updatedStocks,
+          };
         });
       } else {
         const errorData = await response.json();
