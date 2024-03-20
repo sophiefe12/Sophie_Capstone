@@ -10,6 +10,7 @@ const NavBar = ({ isLoggedIn, onLogout, notifications, clearNotifications }) => 
 
   const handleLogoutClick = async () => {
     await onLogout(); // This will call the handleLogout function in App.js
+    clearNotifications();
     navigate('/');
   };
 

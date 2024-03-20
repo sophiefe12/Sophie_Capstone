@@ -38,7 +38,6 @@ with app.app_context():
     db.create_all()
 
 
-
 @app.route("/handle_register", methods=["POST"])
 def handle_register():
     data = request.get_json()
