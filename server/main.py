@@ -15,14 +15,12 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
 app.config['SECRET_KEY'] = 'f9bf78b9a18ce6d46a0cd2b0b86df9da'
-
 app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 app.config['SESSION_COOKIE_SECURE'] = True
 
 un = 'ADMIN'
 pw = 'Capstone2024'
 dsn = '(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)(host=adb.eu-madrid-1.oraclecloud.com))(connect_data=(service_name=g73db8b01b7e944_capstoneorm_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))'
-
 
 pool = oracledb.create_pool(user=un, password=pw, dsn=dsn)
 
@@ -38,6 +36,7 @@ db.init_app(app)
 
 with app.app_context():
     db.create_all()
+
 
 
 @app.route("/handle_register", methods=["POST"])
@@ -97,12 +96,10 @@ def is_logged_in():
         if user:
             return jsonify({"username": user.name, "logged_in": True})
         else:
-            # The user_id was in the session, but no user was found in the database.
-            # This could indicate a stale session, so we clear it for safety.
             session.clear()
             return jsonify({"message": "No user found, session cleared."}), 400
     else:
-        return jsonify({"message": "Not logged in, or no cookie being attached."}), 400
+        return jsonify({"message": "Not logged in, or no cookie being attached."})
 
 
 # fetch the latest stock price from the Alpha Vantage API
@@ -236,83 +233,61 @@ def remove_stock(stock_id):
         return jsonify({'error': 'Stock not found'}), 404
 
 
-# Define a route to get details of a specific stock including its current price and company name
-@app.route('/stock_details/<symbol>', methods=['GET'])
-def get_stock_details(symbol):
+# Define a single route to get both the monthly stock data and the current stock price and company name
+@app.route('/stock/<symbol>', methods=['GET'])
+def get_stock(symbol):
     api_key = os.getenv('ALPHAVANTAGE_API_KEY')
+    base_url = "https://www.alphavantage.co/query"
 
-    # First, try to get the company name by searching for the symbol
+    # Initialize an empty dictionary to hold all stock data
+    stock_data = {}
+
+    # First, get company name using SYMBOL_SEARCH
     search_params = {
         'function': 'SYMBOL_SEARCH',
         'keywords': symbol,
         'apikey': api_key
     }
-    search_response = requests.get("https://www.alphavantage.co/query", params=search_params)
+    search_response = requests.get(base_url, params=search_params)
     if search_response.status_code == 200:
         search_data = search_response.json()
         best_matches = search_data.get('bestMatches', [])
         # Take the first match's name (if available) as the company name
         company_name = best_matches[0].get('2. name') if best_matches else 'Name not found'
-
-        # Now, get the latest price
-        quote_params = {
-            'function': 'GLOBAL_QUOTE',
-            'symbol': symbol,
-            'apikey': api_key
-        }
-        quote_response = requests.get("https://www.alphavantage.co/query", params=quote_params)
-        if quote_response.status_code == 200:
-            quote_data = quote_response.json().get('Global Quote', {})
-            stock_details = {
-                'symbol': symbol,
-                'name': company_name,
-                'price': quote_data.get('05. price', '0'),  # Default to '0' if not found
-            }
-            return jsonify(stock_details), 200
-        else:
-            return jsonify({'error': 'Failed to fetch stock quote data'}), quote_response.status_code
+        stock_data['name'] = company_name
     else:
         return jsonify({'error': 'Failed to fetch company name'}), search_response.status_code
 
+    # Next, get the latest stock price using GLOBAL_QUOTE
+    quote_params = {
+        'function': 'GLOBAL_QUOTE',
+        'symbol': symbol,
+        'apikey': api_key
+    }
+    quote_response = requests.get(base_url, params=quote_params)
+    if quote_response.status_code == 200:
+        quote_data = quote_response.json().get('Global Quote', {})
+        stock_data['price'] = quote_data.get('05. price', '0')  # Default to '0' if not found
+    else:
+        return jsonify({'error': 'Failed to fetch stock quote data'}), quote_response.status_code
 
-# Define a route to get the monthly stock data for the last 12 months of a specific stock
-@app.route('/stock/<symbol>', methods=['GET'])
-def get_stock(symbol):
-    base_url = "https://www.alphavantage.co/query"
-    api_key = os.getenv('ALPHAVANTAGE_API_KEY') 
-    params = {
+    # Then, get the monthly stock data using TIME_SERIES_MONTHLY
+    monthly_params = {
         'function': 'TIME_SERIES_MONTHLY',
         'symbol': symbol,
         'apikey': api_key
     }
-    response = requests.get(base_url, params=params)
-    if response.status_code == 200:
-        data = response.json()
-        monthly_data = data.get('Monthly Time Series', {})
-
+    monthly_response = requests.get(base_url, params=monthly_params)
+    if monthly_response.status_code == 200:
+        monthly_data = monthly_response.json().get('Monthly Time Series', {})
         # Extract last 12 months of data
         last_12_months = list(monthly_data.items())[:12]  # Get the most recent 12 entries
-        print("Last 12 months")
-        closing_prices = [
-            {
-                'date': month,
-                'closing_price': details['4. close']
-            }
-            for month, details in last_12_months
-        ]
-
-        return jsonify(closing_prices), 200
+        closing_prices = [{'date': month, 'closing_price': details['4. close']} for month, details in last_12_months]
+        stock_data['monthly_data'] = closing_prices
     else:
-        return jsonify({'error': 'Failed to fetch stock data'}), response.status_code
+        return jsonify({'error': 'Failed to fetch stock data'}), monthly_response.status_code
 
-
-# @app.errorhandler(404)
-# def resource_not_found(e):
-#     return jsonify(error=str(e)), 404
-
-# @app.errorhandler(500)
-# def server_error(e):
-#     return jsonify(error=str(e)), 500
+    return jsonify(stock_data), 200
 
 @app.before_request
 def before_request():

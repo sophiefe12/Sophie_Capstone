@@ -20,7 +20,7 @@ function StockDetails() {
           throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        const sortedData = data
+        const sortedData = data.monthly_data
           .map(detail => ({...detail, date: detail.date, closing_price: +detail.closing_price}))
           .sort((a, b) => new Date(a.date) - new Date(b.date)); // Sort data by date in ascending order
         setStockDetails(sortedData);
