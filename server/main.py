@@ -14,10 +14,12 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
-app.config['SECRET_KEY'] = 'f9bf78b9a18ce6d46a0cd2b0b86df9da'
+#Cookie Configuration
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 app.config['SESSION_COOKIE_SECURE'] = True
 
+#Db connection
 un = 'ADMIN'
 pw = 'Capstone2024'
 dsn = '(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)(host=adb.eu-madrid-1.oraclecloud.com))(connect_data=(service_name=g73db8b01b7e944_capstoneorm_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))'
@@ -33,11 +35,12 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 app.config['SQLALCHEMY_ECHO'] = False
 
 db.init_app(app)
-
+#Create all db tables
 with app.app_context():
     db.create_all()
 
 
+#Register
 @app.route("/handle_register", methods=["POST"])
 def handle_register():
     data = request.get_json()
@@ -56,7 +59,7 @@ def handle_register():
 
     return jsonify({"message": "User registered and logged in successfully", "user_id": new_user.id}), 201
 
-
+#Login
 @app.route("/handle_login", methods=["POST"])
 def handle_login():
     data = request.get_json()
@@ -73,7 +76,7 @@ def handle_login():
     else:
         return jsonify({"error": "Invalid username or password"}), 401
     
-
+#Logout
 @app.route("/logout", methods=["POST"])
 def logout():
     print("HERE IS", session)
@@ -84,7 +87,7 @@ def logout():
     else:
         return jsonify({'error': 'No user is currently logged in.'}), 401
 
-
+#is_logged_in
 @app.route("/is_logged_in", methods=["GET"])
 def is_logged_in():
     if 'user_id' in session:
@@ -166,7 +169,7 @@ def get_user():
     else:
         return jsonify({'error': 'User not found'}), 404
 
-
+#Define a route to be able to add stocks 
 @app.route('/users/add_stock', methods=['POST'])
 def add_stock():
     user_id =  session.get('user_id')
@@ -219,7 +222,7 @@ def get_stock_details_from_alpha_vantage(symbol):
 
     return company_name, latest_price
 
-
+#Define a route to be able to remove stocks 
 @app.route('/users/remove_stock/<int:stock_id>', methods=['DELETE'])
 def remove_stock(stock_id):
     user_id = session.get('user_id')
@@ -232,7 +235,7 @@ def remove_stock(stock_id):
         return jsonify({'error': 'Stock not found'}), 404
 
 
-# Define a single route to get both the monthly stock data and the current stock price and company name
+# Define a route to get both the monthly stock data and the current stock price and company name
 @app.route('/stock/<symbol>', methods=['GET'])
 def get_stock(symbol):
     api_key = os.getenv('ALPHAVANTAGE_API_KEY')
@@ -288,6 +291,7 @@ def get_stock(symbol):
 
     return jsonify(stock_data), 200
 
+#Session logging
 @app.before_request
 def before_request():
     app.logger.debug('Session before request: %s', session)
