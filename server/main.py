@@ -104,7 +104,7 @@ def is_logged_in():
         return jsonify({"message": "Not logged in, or no cookie being attached."})
 
 
-# fetch the latest stock price from the Alpha Vantage API
+#Fetch the latest stock price from the Alpha Vantage API
 def get_latest_stock_price(symbol):
     api_key = os.getenv('ALPHAVANTAGE_API_KEY')
     params = {
@@ -244,7 +244,7 @@ def get_stock(symbol):
     # Initialize an empty dictionary to hold all stock data
     stock_data = {}
 
-    # First, get company name using SYMBOL_SEARCH
+    #Get company name using SYMBOL_SEARCH
     search_params = {
         'function': 'SYMBOL_SEARCH',
         'keywords': symbol,
@@ -260,7 +260,7 @@ def get_stock(symbol):
     else:
         return jsonify({'error': 'Failed to fetch company name'}), search_response.status_code
 
-    # Next, get the latest stock price using GLOBAL_QUOTE
+    # Get the latest stock price using GLOBAL_QUOTE
     quote_params = {
         'function': 'GLOBAL_QUOTE',
         'symbol': symbol,
@@ -273,7 +273,7 @@ def get_stock(symbol):
     else:
         return jsonify({'error': 'Failed to fetch stock quote data'}), quote_response.status_code
 
-    # Then, get the monthly stock data using TIME_SERIES_MONTHLY
+    #Get the monthly stock data using TIME_SERIES_MONTHLY
     monthly_params = {
         'function': 'TIME_SERIES_MONTHLY',
         'symbol': symbol,
