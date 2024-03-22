@@ -12,12 +12,12 @@ const NavBar = ({ isLoggedIn, onLogout, notifications, clearNotifications }) => 
   const [showNotifications, setShowNotifications] = useState(false); // New state to toggle notifications dropdown
 
   const handleLogoutClick = async () => {
-    await onLogout(); // This will call the handleLogout function in App.js
+    await onLogout(); 
     clearNotifications();
     navigate('/');
   };
 
-  const toggleNotifications = () => setShowNotifications(!showNotifications); // New method to toggle notifications
+  const toggleNotifications = () => setShowNotifications(!showNotifications); 
 
   const linkStyle = { color: '#000080', fontSize: '1.3rem' };
   const logoutStyle = {
@@ -59,7 +59,7 @@ const NavBar = ({ isLoggedIn, onLogout, notifications, clearNotifications }) => 
           icon={faBell} 
           onClick={toggleNotifications}
         />
-        {notifications.length > 0 && ( // This line checks if there are notifications and renders the counter if true
+        {notifications.length > 0 && ( 
           <span className="notificationCounter">
           {notifications.length}
         </span>

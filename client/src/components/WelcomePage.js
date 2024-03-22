@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
+import 'bootstrap/dist/css/bootstrap.min.css'; 
 
 const WelcomePage = ({ onLogin }) => {
   const [username, setUsername] = useState('');
@@ -38,7 +38,7 @@ const WelcomePage = ({ onLogin }) => {
     padding: '2rem',
   };
 
-  const primaryColor = '#BF2200'; // Example primary color from your logo
+  const primaryColor = '#BF2200'; //  primary color from logo
 
 
   return (
@@ -55,7 +55,7 @@ const WelcomePage = ({ onLogin }) => {
           <div className="container">
             <div className="text-center mb-5">
               <img
-                src="/logo_S.png" // Make sure the path to your logo is correct
+                src="/logo_S.png" 
                 alt="Stock Tracker Logo"
                 className="mb-3"
                 style={{ width: '100px', height: 'auto' }}

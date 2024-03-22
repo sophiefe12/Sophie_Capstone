@@ -79,7 +79,6 @@ def handle_login():
 #Logout
 @app.route("/logout", methods=["POST"])
 def logout():
-    print("HERE IS", session)
     if 'user_id' in session:
         session.clear()
         response = make_response(jsonify({'message': 'Logged out successfully'}))

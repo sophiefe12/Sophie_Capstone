@@ -38,7 +38,7 @@
   
   .notificationCounter {
     position: absolute;
-    top: -5px; /* Adjust as needed to position the badge above the bell icon */
+    top: -5px; 
     right: -5px;
     background: red;
     color: white;
@@ -53,7 +53,7 @@
   }
   .notification-dropdown {
     position: absolute;
-    top: 100%; /* Position just below the bell icon */
+    top: 100%; 
     right: 0;
     width: 350px;
     max-height: 300px;

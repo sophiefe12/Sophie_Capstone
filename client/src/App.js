@@ -84,10 +84,9 @@ const handleLogout = useCallback(async () => {
     if (response.ok) {
       setIsLoggedIn(false);
       setUsername('');
-      setUserId(null); // If you are storing user ID in the state
+      setUserId(null); 
       localStorage.removeItem('token');
       // Clear the cookie named 'session' on the client side
-      // Add any additional cleanup here
     } else {
       throw new Error('Logout failed');
     }
